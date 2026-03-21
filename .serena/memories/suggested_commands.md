@@ -1,0 +1,1 @@
+Useful commands for this project on macOS: `git status --short`, `git diff -- <file>`, `rg --files .`, `rg -n "pattern" .`, `sed -n '1,200p' <file>`, `node --check lib/short-link.js`, `node --check lib/short-link-message-dialog.js`, `npm_config_cache=/tmp/short-link-npm-cache npm pack --dry-run`. There are currently no lint/test scripts in package.json.

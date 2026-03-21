@@ -1,0 +1,1 @@
+After changes, at minimum run syntax validation with `node --check` for edited JS files. If packaging metadata changed, run `npm_config_cache=/tmp/short-link-npm-cache npm pack --dry-run` because default user npm cache may have permission issues. Manual verification in Inkdrop is important because the plugin interacts with editor lifecycle, layouts, and DOM mutation observers.

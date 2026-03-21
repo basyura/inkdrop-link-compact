@@ -7,7 +7,10 @@
   "repository": "https://github.com/shagon94/short-link",
   "license": "MIT",
   "engines": {
-    "inkdrop": "^4.x"
+    "inkdrop": "^6.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.6"
+  }
 }
