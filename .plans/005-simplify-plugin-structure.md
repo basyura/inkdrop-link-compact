@@ -36,6 +36,20 @@
 - `lib/short-link.js` で controller インスタンスを直接管理し、`registerClass` / `addComponentToLayout` 系呼び出しを削除した
 - `node --check lib/short-link.js` と `node --check lib/short-link-message-dialog.js` を実行し、構文エラーがないことを確認した
 
+## 追加方針
+
+- `lib/short-link-message-dialog.js` は名前と責務が一致していないため廃止する
+- CodeMirror 拡張生成ロジックを `lib/short-link-extension.js` へ分離する
+- ライフサイクル管理クラスを `lib/short-link-controller.js` へ改名する
+- `lib/short-link.js` は `short-link-controller.js` を参照するだけの構成にする
+
+## 追加実施済み
+
+- `lib/short-link-message-dialog.js` を削除した
+- CodeMirror 拡張ロジックを `lib/short-link-extension.js` へ分離した
+- controller を `lib/short-link-controller.js` へ切り出し、`lib/short-link.js` の import 先を更新した
+- `node --check lib/short-link.js`、`node --check lib/short-link-controller.js`、`node --check lib/short-link-extension.js` を実行し、構文エラーがないことを確認した
+
 ## 参照
 
 - Inkdrop ガイド: `Plugin: Word count`
