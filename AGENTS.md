@@ -5,7 +5,8 @@
 - 修正を始める前に計画をマークダウンファイルで .plans フォルダ配下に日本語で生成してください。
 - 計画のファイル名は連番とし、1つ目を 001 始まりとして修正にあった適切なファイル名としてください。
 - 具体的なファイル編集をする前に、修正案を提示すること。
-- 指示があるまで新しい計画ファイルを作成せず、現在の計画に反映すること。
+- 指示があるまで新しい計画ファイルを作成せず、このセッションで使用する計画ファイルが明示されている場合のみその計画に反映すること。
+- このセッションで使用する計画ファイルが未指定の場合は、既存の計画ファイルを勝手に選んで更新せず、どの計画ファイルを使うか確認すること。
 - API に関しては https://github.com/inkdropapp/api-docs/ サイトを確認すること。特に、inkdrop v5 から v6 への plugin アップデートに関しては https://github.com/inkdropapp/api-docs/blob/main/src/app/appendix/plugin-migration-from-v5-to-v6/page.mdx を参照すること。
 
 ## Project Structure & Module Organization
@@ -65,4 +66,4 @@ Pull requests should include:
 
 ## Agent-Specific Notes
 
-Before making code edits, update the current plan in `.plans/`. Do not create additional plan files unless explicitly instructed.
+Before making code edits, update the plan file already designated for this session in `.plans/`. Do not create additional plan files unless explicitly instructed. If no plan file has been designated for the session, do not choose an existing one yourself; ask which plan file to use first.
