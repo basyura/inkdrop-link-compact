@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.38.6"
+    "@codemirror/view": "^6.38.6",
+    "inkdrop-model": "^2.11.5"
+  },
+  "devDependencies": {
+    "@inkdropapp/types": "^0.0.5"
   }
 }
