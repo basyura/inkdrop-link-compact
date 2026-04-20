@@ -7,6 +7,12 @@
 - Replaces the URL part of Markdown links with a single character, such as an emoji
 - Lets you customize the replacement character in Inkdrop plugin settings
 
+## Screenshots
+
+![Screenshot 1](images/img1.png)
+
+![Screenshot 2](images/img2.png)
+
 ## Installation
 
 Install `link-compact` from Inkdrop's plugin manager.
