@@ -12,12 +12,9 @@
   "repository": "https://github.com/basyura/inkdrop-short-link",
   "license": "MIT",
   "files": [
-    "CHANGELOG.md",
     "LICENSE.md",
     "README.md",
-    "keymaps",
     "lib",
-    "menus",
     "styles"
   ],
   "engines": {

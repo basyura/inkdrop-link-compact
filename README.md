@@ -1,23 +1,30 @@
 # inkdrop-link-compact
 
-`inkdrop-link-compact` は、Inkdrop エディタ上で Markdown リンクの URL 部分をコンパクト表示するプラグインです。カーソルがリンク上に移動している間だけ元の URL をそのまま扱えます。
+`inkdrop-link-compact` is an Inkdrop plugin that compacts the URL portion of Markdown links in the editor. The original URL remains available while the cursor is on the link.
 
 ## Features
 
-- Markdown リンクの URL 部分を絵文字 1 文字に置き換えて表示
-- `Ctrl+Alt+T` でコンパクト表示の切り替え
-- Inkdrop の設定画面から置換文字を変更可能
+- Replaces the URL portion of Markdown links with a single character such as an emoji
+- Lets you change the replacement character from Inkdrop plugin settings
 
 ## Installation
 
-Inkdrop の plugin manager から `link-compact` をインストールしてください。
+Install `link-compact` from Inkdrop's plugin manager.
+
+## Commands
+
+- `link-compact:toggle`
+  - Toggles compact display for Markdown link URLs in the active editor
+
 
 ## Configuration
 
 - `link-compact.linkEmoji`
-  - URL の代わりに表示する文字
-  - 既定値: `🔗`
+  - Character shown in place of the hidden URL
+  - Default: `🔗`
 
 ## Attribution
 
-このプロジェクトは、MIT ライセンスで公開されていた `shagon94/short-link` をベースに、Inkdrop v6 向けの保守と再公開のために調整したフォークです。
+This project is a maintained and republished fork of `shagon94/short-link`, which was originally released under the MIT license, with adjustments for Inkdrop v6.
+
+
