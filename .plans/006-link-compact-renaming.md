@@ -11,7 +11,12 @@
 - `package.json`
   - `name` を `link-compact` に変更
   - `description`、`repository`、`keywords` を再公開向けに更新
+  - `description` は現在の実装に合わせ、カーソル位置に依存する説明を削除し、ノート読み込み時の自動コンパクト表示と `toggle` コマンドによる表示切替を説明する内容に修正する
   - 公開パッケージに含めるファイルを明示して、作業用ファイルが配布物に入らないようにする
+- ドキュメント整合
+  - `AGENTS.md` 内に残っている旧名称 `short-link` 由来の npm キャッシュパスを `link-compact` に合わせて修正する
+  - `AGENTS.md` の整合性を見直し、整形ルールをリポジトリ実態に合う表現へ修正し、`npm pack --dry-run` の実行例表記を統一する
+  - `README.md` の挙動説明を現在の実装に合わせ、ノート読み込み時の自動コンパクト表示と `toggle` コマンドによる切替を説明する内容に修正する
 - プラグイン内部識別子
   - コマンド名 `short-link:*` を `link-compact:*` へ変更
   - 設定キー `short-link.*` を `link-compact.*` へ変更

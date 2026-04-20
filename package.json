@@ -2,7 +2,7 @@
   "name": "link-compact",
   "main": "./lib/link-compact",
   "version": "0.1.0",
-  "description": "Compacts Markdown link URLs in the Inkdrop editor until the cursor moves over them",
+  "description": "Automatically compacts Markdown link URLs when a note is opened and toggles the display with a command",
   "keywords": [
     "inkdrop",
     "plugin",

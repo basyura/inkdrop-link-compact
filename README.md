@@ -1,6 +1,6 @@
 # inkdrop-link-compact
 
-`inkdrop-link-compact` is an Inkdrop plugin that compacts the URL portion of Markdown links in the editor. The original URL remains available while the cursor is on the link.
+`inkdrop-link-compact` is an Inkdrop plugin that automatically compacts the URL portion of Markdown links when a note is opened. You can toggle the compact display in the active editor with a command.
 
 ## Features
 
@@ -26,5 +26,4 @@ Install `link-compact` from Inkdrop's plugin manager.
 ## Attribution
 
 This project is a maintained and republished fork of `shagon94/short-link`, which was originally released under the MIT license, with adjustments for Inkdrop v6.
-
 

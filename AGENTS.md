@@ -30,7 +30,7 @@ No build step is defined in `package.json`. Use these commands for local checks:
 - `node --check lib/link-compact.js`: syntax-check the plugin entry point
 - `node --check lib/link-compact-controller.js`: syntax-check the controller
 - `node --check lib/link-compact-extension.js`: syntax-check the CodeMirror extension
-- `npm_config_cache=/tmp/short-link-npm-cache npm pack --dry-run`: verify package contents without publishing
+- `npm_config_cache=/tmp/link-compact-npm-cache npm pack --dry-run`: verify package contents without publishing
 - `git status --short`: inspect local changes before and after edits
 
 ## Coding Style & Naming Conventions
@@ -41,7 +41,7 @@ Use JavaScript matching the existing codebase:
 - `use babel` pragma for plugin source files
 - Keep module filenames kebab-case, for example `link-compact-extension.js`
 - Prefer small, direct functions and minimal comments
-- Format edited files with Prettier after making changes
+- Keep formatting consistent with the existing file style, and use Prettier only when it is already available in the project or local environment
 
 Do not introduce new tooling unless the repository adopts it first.
 
@@ -50,7 +50,7 @@ Do not introduce new tooling unless the repository adopts it first.
 Automated tests are not currently configured. Until a test suite exists:
 
 - run the `node --check` commands on edited files
-- run `npm pack --dry-run` after changing package metadata or shipped files
+- run `npm_config_cache=/tmp/link-compact-npm-cache npm pack --dry-run` after changing package metadata or shipped files
 - verify behavior manually in Inkdrop v6, especially startup, note switching, and editor interactions
 
 ## Commit & Pull Request Guidelines
