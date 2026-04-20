@@ -11,15 +11,14 @@
 
 ## Project Structure & Module Organization
 
-This repository contains an Inkdrop plugin that shortens Markdown link display inside the editor.
+This repository contains an Inkdrop plugin that compacts Markdown link URL display inside the editor.
 
 Inkdrop v6 uses CodeMirror 6 in this project. `inkdrop.getActiveEditor()` now returns `CodeMirror#EditorView`, so do not assume an `editor.cm` property or CodeMirror 5 APIs such as `markText`.
 
-- `lib/short-link.js`: plugin entry point, lifecycle hooks, and config
-- `lib/short-link-message-dialog.js`: React component registered in Inkdrop and editor behavior
+- `lib/link-compact.js`: plugin entry point, lifecycle hooks, and config
+- `lib/link-compact-controller.js`: command registration and editor lifecycle handling
+- `lib/link-compact-extension.js`: CodeMirror 6 extension for compact link rendering
 - `styles/`: plugin stylesheet
-- `keymaps/` and `menus/`: Inkdrop integration assets
-- `docs/images/`: screenshots used for documentation
 - `.plans/`: working plans for repository changes
 
 There is no dedicated `test/` directory yet.
@@ -28,8 +27,9 @@ There is no dedicated `test/` directory yet.
 
 No build step is defined in `package.json`. Use these commands for local checks:
 
-- `node --check lib/short-link.js`: syntax-check the plugin entry point
-- `node --check lib/short-link-message-dialog.js`: syntax-check the editor component
+- `node --check lib/link-compact.js`: syntax-check the plugin entry point
+- `node --check lib/link-compact-controller.js`: syntax-check the controller
+- `node --check lib/link-compact-extension.js`: syntax-check the CodeMirror extension
 - `npm_config_cache=/tmp/short-link-npm-cache npm pack --dry-run`: verify package contents without publishing
 - `git status --short`: inspect local changes before and after edits
 
@@ -39,7 +39,7 @@ Use JavaScript matching the existing codebase:
 
 - 2-space indentation in JSON, existing JS style preserved per file
 - `use babel` pragma for plugin source files
-- Keep module filenames kebab-case, for example `short-link-message-dialog.js`
+- Keep module filenames kebab-case, for example `link-compact-extension.js`
 - Prefer small, direct functions and minimal comments
 - Format edited files with Prettier after making changes
 
