@@ -1,11 +1,25 @@
 {
-  "name": "short-link",
-  "main": "./lib/short-link",
+  "name": "link-compact",
+  "main": "./lib/link-compact",
   "version": "0.1.0",
-  "description": "Replaces links in documents with some other character or emoji reducing their size until the cursor is over them",
-  "keywords": [],
-  "repository": "https://github.com/shagon94/short-link",
+  "description": "Compacts Markdown link URLs in the Inkdrop editor until the cursor moves over them",
+  "keywords": [
+    "inkdrop",
+    "plugin",
+    "markdown",
+    "link"
+  ],
+  "repository": "https://github.com/basyura/inkdrop-short-link",
   "license": "MIT",
+  "files": [
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "README.md",
+    "keymaps",
+    "lib",
+    "menus",
+    "styles"
+  ],
   "engines": {
     "inkdrop": "^6.0.0"
   },
