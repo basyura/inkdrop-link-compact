@@ -17,6 +17,7 @@
   - `AGENTS.md` 内に残っている旧名称 `short-link` 由来の npm キャッシュパスを `link-compact` に合わせて修正する
   - `AGENTS.md` の整合性を見直し、整形ルールをリポジトリ実態に合う表現へ修正し、`npm pack --dry-run` の実行例表記を統一する
   - `README.md` の挙動説明を現在の実装に合わせ、ノート読み込み時の自動コンパクト表示と `toggle` コマンドによる切替を説明する内容に修正する
+  - `README.md` 全体の英語表現を見直し、導入文と説明文を自然な英語に整える
 - プラグイン内部識別子
   - コマンド名 `short-link:*` を `link-compact:*` へ変更
   - 設定キー `short-link.*` を `link-compact.*` へ変更
@@ -31,6 +32,6 @@
 ## 確認項目
 
 - `node --check` を編集後の JS ファイルに対して実行する
-- `npm_config_cache=/tmp/short-link-npm-cache npm pack --dry-run` を実行する
+- `npm_config_cache=/tmp/link-compact-npm-cache npm pack --dry-run` を実行する
 - `rg -n "short-link"` で旧識別子の残存を確認する
 - Inkdrop v6 で起動、ノート切替、トグル操作、設定反映を手動確認する
