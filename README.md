@@ -2,6 +2,9 @@
 
 `inkdrop-link-compact` is an Inkdrop plugin for Inkdrop that automatically compacts the URL part of Markdown links when you open a note. You can toggle the compact view in the active editor with a command.
 
+* https://my.inkdrop.app/plugins/link-compact
+* https://github.com/basyura/inkdrop-link-compact
+
 ## Features
 
 - Replaces the URL part of Markdown links with a single character, such as an emoji
@@ -9,9 +12,9 @@
 
 ## Screenshots
 
-![Screenshot 1](images/img1.png)
+![Screenshot 1](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img1.png)
 
-![Screenshot 2](images/img2.png)
+![Screenshot 2](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img2.png)
 
 ## Requirements
 
