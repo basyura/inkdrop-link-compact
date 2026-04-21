@@ -13,6 +13,10 @@
 
 ![Screenshot 2](images/img2.png)
 
+## Requirements
+
+- Inkdrop v6 or later
+
 ## Installation
 
 Install `link-compact` from Inkdrop's plugin manager.
