@@ -36,6 +36,17 @@ Install `link-compact` from Inkdrop's plugin manager.
   - Character shown in place of the hidden URL
   - Default: `🔗`
 
+## Rendered HTML
+
+When compact display is enabled, the URL part of a Markdown link is replaced with a non-editable `span`.
+The original URL is stored in the `data-url` attribute.
+
+For example, `https://www.inkdrop.app` is rendered as:
+
+```html
+<span class="link-compact-mark" contenteditable="false" data-url="https://www.inkdrop.app">🔗</span>
+```
+
 ## Attribution
 
 This project is a maintained and republished fork of `shagon94/short-link`, originally released under the MIT license and updated for Inkdrop v6.
