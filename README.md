@@ -50,7 +50,8 @@ The original URL is stored in the `data-url` attribute.
 For example, `https://www.inkdrop.app` is rendered as:
 
 ```html
-<span class="link-compact-mark" contenteditable="false" data-url="https://www.inkdrop.app">🌐</span>
+<span class="link-compact-mark" contenteditable="false"
+      data-url="https://www.inkdrop.app">🌐</span>
 ```
 
 ## Attribution
