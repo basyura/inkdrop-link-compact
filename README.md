@@ -35,6 +35,12 @@ Install `link-compact` from Inkdrop's plugin manager.
 - `link-compact.linkEmoji`
   - Character shown in place of the hidden URL
   - Default: `🌐`
+- `link-compact.notelinkEmoji`
+  - Character shown in place of hidden `inkdrop://` note link URLs
+  - Default: `📓`
+- `link-compact.imglinkEmoji`
+  - Character shown in place of hidden image link URLs
+  - Default: `🖼️`
 
 ## Rendered HTML
 
