@@ -1,7 +1,7 @@
 {
   "name": "link-compact",
   "main": "./lib/link-compact",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Automatically compacts Markdown link URLs when a note is opened and toggles the display with a command",
   "keywords": [
     "inkdrop",
