@@ -42,6 +42,23 @@ Install `link-compact` from Inkdrop's plugin manager.
   - Character shown in place of hidden image link URLs
   - Default: `🖼️`
 
+## Styling compact links
+
+When compact display is enabled, the plugin adds the `link-compact-enabled` class to the editor.
+The following sample makes Markdown link syntax less visually prominent while compact display is enabled.
+Add it to your Inkdrop `Styles.css`:
+
+```css
+.link-compact-enabled .md-link-mark {
+  color: rgba(119, 204, 189, 0.3);
+  color: black !important;
+  font-size: 5pt;
+  margin-left: -2px;
+}
+```
+
+When compact display is disabled, the class is removed and the rule no longer applies.
+
 ## Rendered HTML
 
 When compact display is enabled, the URL part of a Markdown link is replaced with a non-editable `span`.
