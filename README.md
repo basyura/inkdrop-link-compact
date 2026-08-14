@@ -57,6 +57,14 @@ Add it to your Inkdrop `Styles.css`:
 }
 ```
 
+or
+
+```css
+.link-compact-enabled .md-link-mark {
+  display: none;
+}
+```
+
 When compact display is disabled, the class is removed and the rule no longer applies.
 
 ## Rendered HTML
