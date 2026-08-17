@@ -1,6 +1,6 @@
 # inkdrop-link-compact
 
-![movie1](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/movie1.png)
+![movie1](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/movie1.gif)
 
 `inkdrop-link-compact` is an Inkdrop plugin for Inkdrop that automatically compacts the URL part of Markdown links when you open a note. You can toggle the compact view in the active editor with a `link-compact:toggle` command.
 
