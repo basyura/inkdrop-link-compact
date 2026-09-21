@@ -9,7 +9,7 @@
 
 ## Features
 
-- Replaces the URL part of Markdown links with a single character, such as an emoji
+- Replaces the URL part of Markdown links with a subtle upper-right SVG arrow by default
 - Lets you customize the replacement character in Inkdrop plugin settings
 
 ## Screenshots
@@ -36,13 +36,17 @@ Install `link-compact` from Inkdrop's plugin manager.
 
 - `link-compact.linkEmoji`
   - Character shown in place of the hidden URL
-  - Default: `🌐`
+  - Default: empty (upper-right SVG arrow)
 - `link-compact.notelinkEmoji`
   - Character shown in place of hidden `inkdrop://` note link URLs
-  - Default: `📓`
+  - Default: empty (upper-right SVG arrow)
 - `link-compact.imglinkEmoji`
   - Character shown in place of hidden image link URLs
-  - Default: `🖼️`
+  - Default: empty (upper-right SVG arrow)
+
+Leave a setting blank to use the arrow, or enter an emoji or other text to use it instead.
+Each link type is configured independently. Previously saved emoji settings are preserved;
+clear them to use the arrow.
 
 ## Styling compact links
 
@@ -72,9 +76,23 @@ When compact display is disabled, the class is removed and the rule no longer ap
 ## Rendered HTML
 
 When compact display is enabled, the URL part of a Markdown link is replaced with a non-editable `span`.
-The original URL is stored in the `data-url` attribute.
+The original URL remains in the Markdown document and is stored in the `data-url` attribute.
 
-For example, `https://www.inkdrop.app` is rendered as:
+With the default empty setting, `https://www.inkdrop.app` is rendered as:
+
+```html
+<span class="link-compact-mark" contenteditable="false"
+      data-url="https://www.inkdrop.app">
+  <svg viewBox="0 0 24 24" width="1em" height="1em"
+       aria-hidden="true" focusable="false">
+    <path fill="none" stroke="currentColor" stroke-linecap="round"
+          stroke-linejoin="round" stroke-width="1.5"
+          d="M3.84 20.25 19.75 4.34M19.75 19.34v-15h-15"></path>
+  </svg>
+</span>
+```
+
+With `🌐` explicitly configured, it is rendered as:
 
 ```html
 <span class="link-compact-mark" contenteditable="false"

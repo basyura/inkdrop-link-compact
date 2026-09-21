@@ -53,6 +53,41 @@ Automated tests are not currently configured. Until a test suite exists:
 - run `npm_config_cache=/tmp/link-compact-npm-cache npm pack --dry-run` after changing package metadata or shipped files
 - verify behavior manually in Inkdrop v6, especially startup, note switching, and editor interactions
 
+## Electron デバッグによる実機確認（macOS）
+
+Inkdrop の実画面確認には、ユーザーが指定した Electron のデバッグ接続を使用できる。画面操作ツールが使えない場合も、この方法が利用可能か確認する。利用するツールの制約と権限に従うこと。
+
+### 起動と接続
+
+1. `~/Library/Application Support/inkdrop/packages/link-compact` の参照先を確認する。この環境では本リポジトリへのシンボリックリンクになっている。別環境でも同じとは限らないため、変更したソースが読み込まれることを確認する。
+2. Inkdrop を終了してから次のコマンドで起動する。既に起動中のアプリに引数を渡すだけでは、デバッグ接続が有効にならない場合がある。終了時は編集中の内容を保護し、強制終了を避ける。
+
+```sh
+open -a Inkdrop --args --remote-debugging-port=19222 --remote-debugging-address=127.0.0.1
+```
+
+3. 次の接続先から、`type` が `page` で URL に `windowType=full` を含む対象を選ぶ。複数ある場合は対象ウィンドウを特定する。
+
+```sh
+curl --silent --show-error http://127.0.0.1:19222/json/list
+```
+
+4. 対象の `webSocketDebuggerUrl` に Chrome DevTools Protocol（CDP）で接続する。`Runtime.evaluate` で DOM と関連設定を確認し、`Page.captureScreenshot` で実際の描画を確認する。Node.js の組み込み `WebSocket` が利用可能な環境では、追加パッケージなしで接続できる。一時的な検証スクリプトは `/tmp` に置き、リポジトリの依存関係を増やさない。
+
+### 確認する内容
+
+- 起動直後の結果だけで判断せず、エディターとプラグインが読み込まれてから確認する。今回の確認でも、最初の取得では絵文字、その後の取得では SVG が表示された。
+- `require.cache` の `link-compact` 関連パスで、今回変更したソースが読み込まれていることを確認できる。
+- `inkdrop.config.get("link-compact.linkEmoji")`、`notelinkEmoji`、`imglinkEmoji` の値を確認する。保存済みの絵文字は新しいデフォルト値より優先されるため、コード変更だけで SVG 表示になるとは限らない。
+- `.link-compact-mark` の子要素が、設定が空なら右上向きの SVG、指定済みならその文字であることを確認する。SVG は右上向きのパスを直接使用し、`desc` と回転用 `transform` は出力しない。外側の `span` には元の URL を持つ `data-url` が必要。
+- DOM の確認に加え、スクリーンショットで方向・サイズ・色・余白・行高を確認する。括弧を隠すユーザーの stylesheet が適用された状態も確認する。
+- ノート本文や保存済み設定を検証のために無断で上書きしない。必要な一時変更は元の状態を記録して復元する。ログにはノート本文や実際のリンク先を必要以上に出力しない。
+- 通常リンク・ノートリンク・画像リンク、絵文字指定、短縮切り替え、ノート切り替え、カーソル操作のうち、実施した項目と未実施の項目を区別して記録する。DOM 代替オブジェクトによる検証を実機確認として扱わない。
+
+### 終了処理
+
+確認後はデバッグ起動した Inkdrop を終了し、`open -a Inkdrop` で通常起動へ戻す。プロセスの引数から `--remote-debugging-port` がなくなり、`http://127.0.0.1:19222/json/list` に接続できなくなったことを確認する。デバッグ接続はローカル限定で使用する。
+
 ## Commit & Pull Request Guidelines
 
 Recent commits use short, imperative summaries such as `fix url regex` and `add null check`. Follow that style and keep each commit focused.
