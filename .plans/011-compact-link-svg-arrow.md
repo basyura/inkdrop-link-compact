@@ -11,6 +11,8 @@ URL の代わりに表示する絵文字の設定は維持し、デフォルト�
 
 ## 修正案
 
+- 追加指示: README の Screenshots の説明を `Original Markdown`、`With Default Settings`、`With Custom Settings` に修正する。
+
 - 追加指示: 今回確認できた Electron のデバッグ起動・接続・表示確認・通常起動への復帰手順を `AGENTS.md` に追記する。
 
 - 最新の追加指示: 外部で使用しているため `data-url` 属性を再追加する。SVG・絵文字のどちらでも元の URL を保持し、README の説明と HTML 例も復元する。

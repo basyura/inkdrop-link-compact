@@ -14,7 +14,15 @@
 
 ## Screenshots
 
+Original Markdown
+
 ![Screenshot 1](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img1.png)
+
+With Default Settings
+
+![Screenshot 3](images/img3.png)
+
+With Custom Settings
 
 ![Screenshot 2](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img2.png)
 
