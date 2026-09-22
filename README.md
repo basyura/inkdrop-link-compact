@@ -11,6 +11,7 @@
 
 - Replaces the URL part of Markdown links with a subtle upper-right SVG arrow by default
 - Lets you customize the replacement character in Inkdrop plugin settings
+- Press Enter inside a compact image link to reveal its URL without inserting a newline. The URL stays visible while you edit the link and compacts again when the cursor leaves it.
 
 ## Screenshots
 
