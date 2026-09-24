@@ -59,7 +59,7 @@ clear them to use the arrow.
 
 ## Styling compact links
 
-When compact display is enabled, the plugin adds the `link-compact-enabled` class to the editor.
+When compact display is enabled, the plugin adds the `link-compact-enabled` class to each compact link.
 The following sample makes Markdown link syntax less visually prominent while compact display is enabled.
 Add it to your Inkdrop `Styles.css`:
 
@@ -81,6 +81,27 @@ or
 ```
 
 When compact display is disabled, the class is removed and the rule no longer applies.
+
+To style the title and URL brackets independently, use these classes:
+
+- `link-compact-label-bracket`: the outer `[` and `]` around the title
+- `link-compact-url-bracket`: the outer `(` and `)` around the URL
+
+For example, dim the title brackets and hide only the URL brackets:
+
+```css
+.link-compact-label-bracket {
+  color: gray;
+}
+
+.link-compact-url-bracket {
+  display: none;
+}
+```
+
+These classes apply to compact regular, note, and image links. They are removed
+while a link is expanded for editing or compact display is disabled.
+The image prefix `!` and brackets inside the title or URL are not targeted.
 
 ## Rendered HTML
 
