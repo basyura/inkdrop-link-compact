@@ -11,6 +11,9 @@
 
 - Replaces the URL part of Markdown links with a subtle upper-right SVG arrow by default
 - Lets you customize the replacement character in Inkdrop plugin settings
+- Hides the outer `[` / `]` and `(` / `)` of links. Cursor movement treats the compact URL icon as one unit, including in Vim normal mode. The Markdown text is preserved.
+- Keeps hidden link syntax out of Vim's block cursor while preserving its background and outline.
+- Labels remain editable. Editing a link reveals its syntax; toggle compact display off to edit the original Markdown explicitly. Backspace at the start of a compact label or after its icon, and Delete at the end of the label, reveal the syntax before deleting hidden link syntax.
 - Press Enter inside a compact image link to reveal its URL without inserting a newline. The URL stays visible while you edit the link and compacts again when the cursor leaves it.
 
 ## Screenshots
@@ -82,30 +85,19 @@ or
 
 When compact display is disabled, the class is removed and the rule no longer applies.
 
-To style the title and URL brackets independently, use these classes:
+The outer label brackets `[` and `]` and URL parentheses `(` and `)` are hidden
+by the editor extension. CSS that shrinks or hides them is no longer needed.
+The `link-compact-label-bracket` and `link-compact-url-bracket` classes are no
+longer emitted. Toggle compact display off to show and edit the original syntax.
 
-- `link-compact-label-bracket`: the outer `[` and `]` around the title
-- `link-compact-url-bracket`: the outer `(` and `)` around the URL
-
-For example, dim the title brackets and hide only the URL brackets:
-
-```css
-.link-compact-label-bracket {
-  color: gray;
-}
-
-.link-compact-url-bracket {
-  display: none;
-}
-```
-
-These classes apply to compact regular, note, and image links. They are removed
-while a link is expanded for editing or compact display is disabled.
-The image prefix `!` and brackets inside the title or URL are not targeted.
+This applies to regular, note, and image links. The image prefix `!` is also hidden
+and skipped during cursor movement. Brackets inside the label are preserved.
+The closing label bracket and parenthesized URL
+are represented by a single icon, so cursor movement skips their hidden text.
 
 ## Rendered HTML
 
-When compact display is enabled, the URL part of a Markdown link is replaced with a non-editable `span`.
+When compact display is enabled, the closing label bracket and parenthesized URL (`](URL)`) are replaced with a non-editable `span`.
 The original URL remains in the Markdown document and is stored in the `data-url` attribute.
 
 With the default empty setting, `https://www.inkdrop.app` is rendered as:
