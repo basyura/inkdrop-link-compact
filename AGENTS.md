@@ -21,6 +21,13 @@ Inkdrop v6 uses CodeMirror 6 in this project. `inkdrop.getActiveEditor()` now re
 - `styles/`: plugin stylesheet
 - `test/`: automated tests and test helpers; see `test/README.md` for coverage and limitations
 - `.plans/`: working plans for repository changes
+- `docs/specs/`: current behavior specifications for implementation and review
+
+## 仕様書の維持
+
+- 実装を変更する前に `docs/specs/README.md` から該当する現行仕様を確認する。
+- 実装で動作を変更した場合は、同じ作業で `docs/specs/` の該当箇所を更新する。新しい動作を追加した場合も適切な仕様ファイルへ反映する。
+- 仕様と実装・テストの食い違いを見つけた場合は、実際の動作を確認し、仕様書を合わせて修正する。
 
 ## Build, Test, and Development Commands
 
