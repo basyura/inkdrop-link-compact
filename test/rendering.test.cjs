@@ -42,8 +42,16 @@ const cases = [
     [],
   ],
   ["空文書", "", []],
-  // The current scanner is textual, not a CommonMark syntax-tree parser.
-  ["コード内のリンクも対象", "`[a](one)`\n```\n[b](two)\n```", ["one", "two"]],
+  ["行内コード", "`[a](one)` [b](two)", ["two"]],
+  ["複数バッククォートの行内コード", "``[a](one)`x`` [b](two)", ["two"]],
+  ["複数行の行内コード", "`[a](one)\n[b](two)` [c](three)", ["three"]],
+  ["フェンス付きコードブロック", "[a](one)\n```js\n[b](two)\n```\n[c](three)", ["one", "three"]],
+  ["長いフェンス", "````\n[a](one)\n```\n[b](two)\n````\n[c](three)", ["three"]],
+  ["字下げしたフェンス", "  ```\n[a](one)\n  ```\n[b](two)", ["two"]],
+  ["閉じていないフェンス", "[a](one)\n```\n[b](two)", ["one"]],
+  ["4 文字の字下げはフェンスではない", "    ```\n[a](one)", ["one"]],
+  ["コード内の括弧は後続リンクに影響しない", "`[x` [a](one)", ["one"]],
+  ["コード領域にまたがる記法は対象外", "[a]`x`(one) [b](two)", ["two"]],
   ["タイトル部分も URL として保持", '[a](url "title")', ['url "title"']],
 ];
 
@@ -60,6 +68,23 @@ for (const [name, doc, urls] of cases) {
     assert.equal(view.instance.editingRanges.size, 0);
   });
 }
+
+test("コードフェンスを編集するとリンクの短縮を再判定する", () => {
+  const doc = "```\n[a](one)\n```\n[b](two)";
+  const view = h.compact(doc);
+  assert.deepEqual(widgets(view).map(({ value }) => value.spec.widget.url), ["two"]);
+  const closing = doc.indexOf("```", 3);
+  view.dispatch({
+    changes: [
+      { from: 0, to: 3, insert: "---" },
+      { from: closing, to: closing + 3, insert: "---" },
+    ],
+  });
+  assert.deepEqual(
+    widgets(view).map(({ value }) => value.spec.widget.url),
+    ["one", "two"]
+  );
+});
 
 for (const [doc, opening, label, closing] of [
   ["x [label](url) z", "[", "label", "](url)"],
