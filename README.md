@@ -13,8 +13,8 @@
 - Lets you customize the replacement character in Inkdrop plugin settings
 - Hides the outer `[` / `]` and `(` / `)` of links. Cursor movement treats the compact URL icon as one unit, including in Vim normal mode. The Markdown text is preserved.
 - Keeps hidden link syntax out of Vim's block cursor while preserving its background and outline.
-- Labels remain editable. Editing a link reveals its syntax; toggle compact display off to edit the original Markdown explicitly. Backspace at the start of a compact label or after its icon, and Delete at the end of the label, reveal the syntax before deleting hidden link syntax.
-- Press Enter inside a compact image link to reveal its URL without inserting a newline. The URL stays visible while you edit the link and compacts again when the cursor leaves it.
+- Press Enter inside a compact image link to reveal its URL without inserting a newline. 
+- The URL stays visible while you edit the link and compacts again when the cursor leaves it.
 
 ## Screenshots
 
@@ -24,11 +24,11 @@ Original Markdown
 
 With Default Settings
 
-![Screenshot 3](images/img3.png)
+![Screenshot 2](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img2.png)
 
 With Custom Settings
 
-![Screenshot 2](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img2.png)
+![Screenshot 3](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img2.png)
 
 ## Requirements
 
@@ -63,23 +63,13 @@ clear them to use the arrow.
 ## Styling compact links
 
 When compact display is enabled, the plugin adds the `link-compact-enabled` class to each compact link.
-The following sample makes Markdown link syntax less visually prominent while compact display is enabled.
-Add it to your Inkdrop `Styles.css`:
 
 ```css
-.link-compact-enabled .md-link-mark {
-  color: rgba(119, 204, 189, 0.3);
-  color: black !important;
-  font-size: 5pt;
-  margin-left: -2px;
-}
-```
-
-or
-
-```css
-.link-compact-enabled .md-link-mark {
-  display: none;
+.link-compact-enabled {
+  .link-compact-label-bracket .md-link-mark {
+  }
+  .link-compact-url-bracket .md-link-mark {
+  }
 }
 ```
 
@@ -120,32 +110,6 @@ With `🌐` explicitly configured, it is rendered as:
 <span class="link-compact-mark" contenteditable="false"
       data-url="https://www.inkdrop.app">🌐</span>
 ```
-
-## Development and tests
-
-Use Node.js 22 or later, install dependencies with `npm ci`, then run:
-
-```sh
-npm test
-npm run test:coverage
-```
-
-The tests use Node.js's built-in test runner and the installed CodeMirror packages;
-no additional test dependencies are required. The VM modules flag loads Inkdrop's
-mixed ES module/CommonJS source without rewriting it or changing the plugin.
-Node.js may print an experimental VM modules warning.
-
-Tests cover link parsing, decorations and settings, editing and selection
-transactions, key commands, Vim cursor classes, and plugin lifecycle behavior.
-The coverage command reports on `lib/` only.
-
-These are headless tests: a view adapter drives the production plugin with real
-CodeMirror state, transactions, keymaps and range sets. Inkdrop services,
-`event-kit`, DOM nodes and mutation notifications are test doubles. They do not
-verify actual EditorView rendering, browser event handling, native Vim movement,
-IME input, or Inkdrop navigation. See [test/README.md](test/README.md) for the
-coverage map and remaining manual checks.
-
 ## Attribution
 
 This project is a maintained and republished fork of `shagon94/short-link`, originally released under the MIT license and updated for Inkdrop v6.
