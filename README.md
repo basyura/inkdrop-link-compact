@@ -28,7 +28,7 @@ With Default Settings
 
 With Custom Settings
 
-![Screenshot 3](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img2.png)
+![Screenshot 3](https://raw.githubusercontent.com/basyura/inkdrop-link-compact/master/images/img3.png)
 
 ## Requirements
 
