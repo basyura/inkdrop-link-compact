@@ -121,6 +121,31 @@ With `🌐` explicitly configured, it is rendered as:
       data-url="https://www.inkdrop.app">🌐</span>
 ```
 
+## Development and tests
+
+Use Node.js 22 or later, install dependencies with `npm ci`, then run:
+
+```sh
+npm test
+npm run test:coverage
+```
+
+The tests use Node.js's built-in test runner and the installed CodeMirror packages;
+no additional test dependencies are required. The VM modules flag loads Inkdrop's
+mixed ES module/CommonJS source without rewriting it or changing the plugin.
+Node.js may print an experimental VM modules warning.
+
+Tests cover link parsing, decorations and settings, editing and selection
+transactions, key commands, Vim cursor classes, and plugin lifecycle behavior.
+The coverage command reports on `lib/` only.
+
+These are headless tests: a view adapter drives the production plugin with real
+CodeMirror state, transactions, keymaps and range sets. Inkdrop services,
+`event-kit`, DOM nodes and mutation notifications are test doubles. They do not
+verify actual EditorView rendering, browser event handling, native Vim movement,
+IME input, or Inkdrop navigation. See [test/README.md](test/README.md) for the
+coverage map and remaining manual checks.
+
 ## Attribution
 
 This project is a maintained and republished fork of `shagon94/short-link`, originally released under the MIT license and updated for Inkdrop v6.

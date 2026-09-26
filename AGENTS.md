@@ -19,14 +19,15 @@ Inkdrop v6 uses CodeMirror 6 in this project. `inkdrop.getActiveEditor()` now re
 - `lib/link-compact-controller.js`: command registration and editor lifecycle handling
 - `lib/link-compact-extension.js`: CodeMirror 6 extension for compact link rendering
 - `styles/`: plugin stylesheet
+- `test/`: automated tests and test helpers; see `test/README.md` for coverage and limitations
 - `.plans/`: working plans for repository changes
-
-There is no dedicated `test/` directory yet.
 
 ## Build, Test, and Development Commands
 
 No build step is defined in `package.json`. Use these commands for local checks:
 
+- `npm test`: run all automated tests
+- `npm run test:coverage`: run all automated tests and report coverage for `lib/`
 - `node --check lib/link-compact.js`: syntax-check the plugin entry point
 - `node --check lib/link-compact-controller.js`: syntax-check the controller
 - `node --check lib/link-compact-extension.js`: syntax-check the CodeMirror extension
@@ -47,7 +48,13 @@ Do not introduce new tooling unless the repository adopts it first.
 
 ## Testing Guidelines
 
-Automated tests are not currently configured. Until a test suite exists:
+自動テストは Node.js 標準のテストランナーで実行する。
+
+- 修正時は、変更内容を検証するテストを必ず追加する。不具合修正では再発を防ぐ回帰テストを追加する。
+- 修正後は `npm test` で全てのテストを実行し、エラー・失敗がないことを確認する。変更箇所に関係するテストだけの実行で済ませない。
+- テストが失敗した場合は原因を修正し、再度全てのテストを実行して成功を確認してから作業完了とする。
+
+Additional checks:
 
 - run the `node --check` commands on edited files
 - run `npm_config_cache=/tmp/link-compact-npm-cache npm pack --dry-run` after changing package metadata or shipped files

@@ -11,6 +11,10 @@
   ],
   "repository": "https://github.com/basyura/inkdrop-link-compact",
   "license": "MIT",
+  "scripts": {
+    "test": "node --experimental-vm-modules --test test/*.test.cjs",
+    "test:coverage": "node --experimental-vm-modules --test --experimental-test-coverage --test-coverage-include='lib/**' test/*.test.cjs"
+  },
   "files": [
     "LICENSE.md",
     "README.md",
