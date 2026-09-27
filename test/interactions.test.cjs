@@ -300,6 +300,118 @@ test("h / l は入力用に残し、通常文字入力として文書へ反映�
   assert.equal(widgets(view).length, 1);
 });
 
+for (const [key, text, startLine, expected] of [
+  ["o", "[a](url)", 1, "[a](url)\n"],
+  ["O", "[a](url)\nnext", 1, "[a](url)\n\nnext"],
+  ["o", "[a](inkdrop://note:1)", 1, "[a](inkdrop://note:1)\n"],
+  ["o", "![a](image.png)", 1, "![a](image.png)\n"],
+]) {
+  test(`Vim ${key} は短縮リンクを分割せず行を追加する: ${text}`, () => {
+    const view = h.compact(text, {
+      anchor: key === "O" ? text.indexOf("next") : text.indexOf("a"),
+      vim: true,
+    });
+    view.keydown(key);
+    const line = view.state.doc.line(startLine);
+    view.dispatch({ selection: { anchor: line.to } });
+    assert.equal(view.state.selection.main.head, line.to);
+    view.dispatch({
+      changes: { from: line.to, insert: "\n" },
+      selection: { anchor: line.to + 1 },
+    });
+    assert.equal(view.state.doc.toString(), expected);
+    assert.equal(view.state.selection.main.head, line.to + 1);
+    assert.equal(widgets(view).length, 1);
+    const labelEnd = text.startsWith("!") ? 3 : 2;
+    view.dispatch({ selection: { anchor: labelEnd } });
+    view.dispatch({ selection: { anchor: line.to } });
+    assert.equal(view.state.selection.main.head, labelEnd);
+  });
+}
+
+test("Vim の通常移動と他モードでは行末の選択補正を維持する", () => {
+  for (const mode of ["l", "insert", "visual", "replace", "modifier"]) {
+    const view = h.compact("[a](url)", { anchor: 2, vim: true });
+    if (mode === "insert") {
+      view.dom.classList.remove("vim-mode-normal");
+      view.dom.classList.add("vim-mode-insert");
+      view.scrollDOM.classList.remove("cm-vimMode");
+      view.keydown("o");
+    } else if (mode === "visual" || mode === "replace") {
+      view.dom.classList.remove("vim-mode-normal");
+      view.dom.classList.add(`vim-mode-${mode}`);
+      view.keydown("o");
+    } else if (mode === "modifier") {
+      view.keydown("o", { ctrlKey: true });
+    } else {
+      view.keydown("l");
+    }
+    view.dispatch({ selection: { anchor: view.state.doc.length } });
+    assert.equal(view.state.selection.main.head, mode === "insert" ? 8 : 2);
+  }
+});
+
+for (const key of ["o", "O"]) {
+  test(`ノート切り替え直後の初回 ${key} は行末の短縮リンクを分割しない`, () => {
+    const first = (h.env.activeEditor = h.createView("before"));
+    const controller = new h.Controller();
+    controller.activate();
+    const view = (h.env.activeEditor = h.createView("[a](url)\nnext", {
+      anchor: key === "O" ? 9 : 1,
+      vim: true,
+    }));
+    view.dom.classList.remove("vim-mode-normal");
+    h.env.editingNote = { _id: "note:next" };
+    controller.observer.fire();
+    assert.equal(widgets(view).length, 1);
+    view.keydown(key);
+    view.dispatch({ selection: { anchor: 8 } });
+    assert.equal(view.state.selection.main.head, 8);
+    view.dispatch({
+      changes: { from: 8, insert: "\n" },
+      selection: { anchor: 9 },
+    });
+    assert.equal(view.state.doc.toString(), "[a](url)\n\nnext");
+    assert.equal(widgets(view).length, 1);
+    assert.equal(first.state.doc.toString(), "before");
+    controller.deactivate();
+  });
+}
+
+for (const [name, text, from, inserted, expected] of [
+  ["通常リンク", "[a](url)", 2, "\n", "[a](url)\n"],
+  ["URL の内部", "[a](url)", 5, "\n", "[a](url)\n"],
+  ["ノートリンク", "[a](inkdrop://note:1)", 2, "\n", "[a](inkdrop://note:1)\n"],
+  ["画像リンク", "![a](image.png)", 3, "\n", "![a](image.png)\n"],
+  ["インデント", "[a](url)", 2, "\n  ", "[a](url)\n  "],
+]) {
+  test(`初回キーの判定が間に合わなくても ${name} の改行を行末へ移す`, () => {
+    const view = h.compact(text, { anchor: 2, vim: true });
+    view.dom.classList.remove("vim-mode-normal");
+    view.dispatch({
+      changes: { from, insert: inserted },
+      selection: { anchor: from + inserted.length },
+      userEvent: "input",
+    });
+    assert.equal(view.state.doc.toString(), expected);
+    assert.equal(view.state.selection.main.head, text.length + inserted.length);
+    assert.equal(widgets(view).length, 1);
+  });
+}
+
+test("挿入モードと Vim 以外の改行はリンク編集中として扱う", () => {
+  for (const vim of [true, false]) {
+    const view = h.compact("[a](url)", { anchor: 2, vim });
+    if (vim) view.scrollDOM.classList.remove("cm-vimMode");
+    view.dispatch({
+      changes: { from: 2, insert: "\n" },
+      selection: { anchor: 3 },
+      userEvent: "input",
+    });
+    assert.equal(view.state.doc.toString(), "[a\n](url)");
+  }
+});
+
 test("選択なし・古い状態・プラグイン不在のトランザクションは補正しない", () => {
   const view = h.compact(doc);
   const filter = view.state.facet(EditorState.transactionFilter)[0];

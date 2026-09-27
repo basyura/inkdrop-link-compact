@@ -36,6 +36,7 @@ function element(tagName = "div", namespaceURI = null) {
 async function createHarness(config = {}) {
   const observers = [];
   const registrations = [];
+  const domHandlers = [];
   const views = [];
   const commands = new Map();
   const editorLoads = new Set();
@@ -99,6 +100,17 @@ async function createHarness(config = {}) {
   // keymaps, transactions, compartments, decorations, and atomic range sets.
   const viewModule = {
     ...cm,
+    EditorView: new Proxy(cm.EditorView, {
+      get(target, property) {
+        if (property === "domEventHandlers") {
+          return (handlers) => {
+            domHandlers.push(handlers);
+            return cm.EditorView.domEventHandlers(handlers);
+          };
+        }
+        return Reflect.get(target, property);
+      },
+    }),
     ViewPlugin: {
       fromClass(Class, spec) {
         const definition = cm.ViewPlugin.fromClass(Class, spec);
@@ -149,7 +161,9 @@ async function createHarness(config = {}) {
   function createView(doc, { anchor = 0, vim = false, cursors = [] } = {}) {
     const instances = new Map();
     const scrollDOM = element();
+    const dom = element();
     if (vim) scrollDOM.classList.add("cm-vimMode");
+    if (vim) dom.classList.add("vim-mode-normal");
     scrollDOM.querySelectorAll = () => view.cursors;
     const view = {
       state: state.EditorState.create({
@@ -159,6 +173,7 @@ async function createHarness(config = {}) {
       }),
       composing: false,
       scrollDOM,
+      dom,
       cursors,
       dispatches: [],
       plugin: (definition) => instances.get(definition) ?? null,
@@ -188,6 +203,10 @@ async function createHarness(config = {}) {
           }
         }
         return false;
+      },
+      keydown(key, modifiers = {}) {
+        const event = { key, ...modifiers };
+        for (const handlers of domHandlers) handlers.keydown?.(event, this);
       },
       get instance() {
         return instances.values().next().value;
