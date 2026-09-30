@@ -434,3 +434,53 @@ test("短縮解除中は記法内部の選択とキーを制御しない", () =>
     assert.equal(view.key(key), false);
   assert.equal(view.state.doc.toString(), doc);
 });
+
+for (const text of ["[label](url)", "[label](inkdrop://note:1)", "![label](image.png)", "prefix [label](url)"]) {
+  test(`Vim i はラベル先頭からリンクの前へ挿入する: ${text}`, () => {
+    const start = text.startsWith("!") ? 0 : text.indexOf("[");
+    const view = h.compact(text, { anchor: text.indexOf("[") + 1, vim: true });
+    view.dom.classList.remove("vim-mode-normal");
+    view.keydown("i");
+    assert.equal(view.state.selection.main.head, start);
+    view.scrollDOM.classList.remove("cm-vimMode");
+    view.dom.classList.add("vim-mode-insert");
+    view.dispatch({ selection: { anchor: start } });
+    assert.equal(view.state.selection.main.head, start);
+    view.keydown("X");
+    view.dispatch({ changes: { from: start, insert: "X" }, selection: { anchor: start + 1 } });
+    assert.equal(view.state.doc.toString(), text.slice(0, start) + "X" + text.slice(start));
+    assert.equal(widgets(view).length, 1);
+  });
+}
+
+for (const mode of ["plain", "insert", "visual", "replace", "modifier", "composition", "middle", "selection", "multiple", "expanded", "other key"]) {
+  test(`Vim i の補正は ${mode} には適用しない`, () => {
+    const view = h.compact("[label](url)", { anchor: 1, vim: mode !== "plain" });
+    if (["insert", "visual", "replace"].includes(mode)) view.dom.classList.add(`vim-mode-${mode}`);
+    if (mode === "composition") view.composing = true;
+    if (mode === "middle") view.dispatch({ selection: { anchor: 2 } });
+    if (mode === "selection") view.dispatch({ selection: { anchor: 1, head: 3 } });
+    if (mode === "multiple") view.dispatch({ selection: EditorSelection.create([EditorSelection.cursor(1), EditorSelection.cursor(3)]) });
+    if (mode === "expanded") view.key("Backspace");
+    const before = view.state.selection;
+    view.keydown(mode === "other key" ? "a" : "i", mode === "modifier" ? { ctrlKey: true } : {});
+    assert.equal(view.state.selection, before);
+  });
+}
+
+test("Vim i の補正は次のキーで解除され、通常移動へ影響しない", () => {
+  const view = h.compact("[label](url)", { anchor: 1, vim: true });
+  view.keydown("i");
+  assert.equal(view.state.selection.main.head, 0);
+  view.keydown("Escape");
+  view.dispatch({ selection: { anchor: 1 } });
+  view.dispatch({ selection: { anchor: 0 } });
+  assert.equal(view.state.selection.main.head, 1);
+});
+
+test("短縮解除中の Vim i はカーソル位置を変えない", () => {
+  const view = h.compact("[label](url)", { anchor: 1, vim: true });
+  h.extension.ensureLinkCompactExtension(view, true);
+  view.keydown("i");
+  assert.equal(view.state.selection.main.head, 1);
+});
