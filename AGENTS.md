@@ -16,8 +16,8 @@ This repository contains an Inkdrop plugin that compacts Markdown link URL displ
 Inkdrop v6 uses CodeMirror 6 in this project. `inkdrop.getActiveEditor()` now returns `CodeMirror#EditorView`, so do not assume an `editor.cm` property or CodeMirror 5 APIs such as `markText`.
 
 - `lib/link-compact.js`: plugin entry point, lifecycle hooks, and config
-- `lib/link-compact-controller.js`: command registration and editor lifecycle handling
-- `lib/link-compact-extension.js`: CodeMirror 6 extension for compact link rendering
+- `lib/controller.js`: command registration and editor lifecycle handling
+- `lib/extension.js`: CodeMirror 6 extension for compact link rendering
 - `styles/`: plugin stylesheet
 - `test/`: automated tests and test helpers; see `test/README.md` for coverage and limitations
 - `.plans/`: working plans for repository changes
@@ -36,8 +36,8 @@ No build step is defined in `package.json`. Use these commands for local checks:
 - `npm test`: run all automated tests
 - `npm run test:coverage`: run all automated tests and report coverage for `lib/`
 - `node --check lib/link-compact.js`: syntax-check the plugin entry point
-- `node --check lib/link-compact-controller.js`: syntax-check the controller
-- `node --check lib/link-compact-extension.js`: syntax-check the CodeMirror extension
+- `node --check lib/controller.js`: syntax-check the controller
+- `node --check lib/extension.js`: syntax-check the CodeMirror extension
 - `npm_config_cache=/tmp/link-compact-npm-cache npm pack --dry-run`: verify package contents without publishing
 - `git status --short`: inspect local changes before and after edits
 
@@ -47,7 +47,7 @@ Use JavaScript matching the existing codebase:
 
 - 2-space indentation in JSON, existing JS style preserved per file
 - `use babel` pragma for plugin source files
-- Keep module filenames kebab-case, for example `link-compact-extension.js`
+- Keep module filenames kebab-case, for example `extension.js`
 - Prefer small, direct functions and minimal comments
 - Keep formatting consistent with the existing file style, and use Prettier only when it is already available in the project or local environment
 

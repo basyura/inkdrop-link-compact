@@ -151,3 +151,31 @@ test("複数エディターの短縮・編集状態を独立して保持する",
   assert.equal(second.key("Enter"), true);
   assert.deepEqual(h.openedUris, ["two"]);
 });
+
+test("分割モジュールは有効なエディターへの初回適用まで CodeMirror を読み込まない", () => {
+  assert.deepEqual(h.requiredModules, []);
+  h.extension.ensureLinkCompactExtension(null, false);
+  assert.deepEqual(h.requiredModules, []);
+  const first = h.compact("[a](url)");
+  const loaded = [...h.requiredModules];
+  assert.ok(loaded.includes("@codemirror/state"));
+  assert.ok(loaded.includes("@codemirror/view"));
+  h.extension.ensureLinkCompactExtension(first, false);
+  h.compact("[b](other)");
+  assert.deepEqual(h.requiredModules, loaded);
+});
+
+test("分割後もリンク展開と選択補正は対象エディターだけに適用される", () => {
+  const first = h.compact("![a](image)");
+  const second = h.compact("[b](url)");
+  first.dispatch({ selection: { anchor: 2 } });
+  assert.equal(first.key("Enter"), true);
+  assert.equal(widgets(first).length, 0);
+  assert.equal(widgets(second).length, 1);
+  second.dispatch({ selection: { anchor: 5 } });
+  assert.equal(second.state.selection.main.head, 8);
+  assert.equal(first.state.selection.main.head, 1);
+  assert.equal(widgets(first).length, 0);
+  assert.equal(second.key("Backspace"), true);
+  assert.equal(widgets(second).length, 0);
+});

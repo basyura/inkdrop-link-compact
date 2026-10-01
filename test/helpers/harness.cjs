@@ -36,6 +36,7 @@ function element(tagName = "div", namespaceURI = null) {
 async function createHarness(config = {}) {
   const observers = [];
   const registrations = [];
+  const requiredModules = [];
   const domHandlers = [];
   const views = [];
   const commands = new Map();
@@ -126,6 +127,7 @@ async function createHarness(config = {}) {
     inkdrop,
     module: hostModule,
     require(name) {
+      requiredModules.push(name);
       if (name === "@codemirror/view") return viewModule;
       if (name === "@codemirror/state") return state;
       throw new Error(`Unexpected require: ${name}`);
@@ -156,7 +158,7 @@ async function createHarness(config = {}) {
   }
   const main = await load("link-compact");
   await main.evaluate();
-  const extension = modules.get("link-compact-extension").namespace;
+  const extension = modules.get("extension").namespace;
 
   function createView(doc, { anchor = 0, vim = false, cursors = [] } = {}) {
     const instances = new Map();
@@ -229,8 +231,9 @@ async function createHarness(config = {}) {
     observers,
     document,
     extension,
+    requiredModules,
     entry: hostModule.exports,
-    Controller: modules.get("link-compact-controller").namespace.default,
+    Controller: modules.get("controller").namespace.default,
     createView,
     compact(doc, options) {
       const view = createView(doc, options);
