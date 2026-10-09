@@ -38,6 +38,34 @@ for (const vim of [false, true]) {
   }
 }
 
+for (const [name, from, to, expected] of [
+  ["l で URL を越える", 6, 7, 12],
+  ["h で URL を越える", 12, 11, 6],
+  ["h で開始括弧を越える", 3, 2, 1],
+]) {
+  test(`他プラグインの移動補正後も短縮範囲を越える: ${name}`, () => {
+    const view = h.createView(doc, { anchor: from, vim: true });
+    let pendingMotion = false;
+    // hide-markup computes a motion before Vim handles the key, then applies
+    // that position in its transaction filter, even if another filter moved it.
+    view.dispatch({
+      effects: StateEffect.appendConfig.of(
+        EditorState.transactionFilter.of((transaction) =>
+          pendingMotion && transaction.selection && !transaction.docChanged
+            ? [transaction, { selection: { anchor: to } }]
+            : transaction
+        )
+      ),
+    });
+    h.extension.ensureLinkCompactExtension(view, false);
+    pendingMotion = true;
+    view.dispatch({ selection: { anchor: to } });
+    assert.equal(view.state.selection.main.head, expected);
+    assert.equal(widgets(view).length, 1);
+    assert.equal(view.state.doc.toString(), doc);
+  });
+}
+
 for (const [name, text, from, to, expected, vim] of [
   ["画像の ![ を右へ", "x ![a](u) z", 1, 2, 4, false],
   ["画像の ![ を左へ", "x ![a](u) z", 4, 3, 1, false],
