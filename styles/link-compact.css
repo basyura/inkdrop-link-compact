@@ -1,15 +1,19 @@
 .link-compact-mark {
-  font-size: 90%;
+  font-size: 80%;
 }
 
 .cm-vimCursorLayer .link-compact-hidden-cursor-text {
   color: transparent !important;
 }
 
+.link-compact-mark:has(> svg) {
+  font-size: inherit;
+}
+
 .link-compact-mark > svg {
-  width: 1em;
-  height: 1em;
-  margin-left: 0.15em;
-  vertical-align: -0.125em;
+  width: 0.8em;
+  height: 0.7em;
+  margin-left: 0.135em;
+  vertical-align: baseline;
   opacity: 0.65;
 }

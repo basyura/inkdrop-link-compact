@@ -1,5 +1,7 @@
 const assert = require("node:assert/strict");
 const { test, beforeEach, afterEach } = require("node:test");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
 const { createHarness, ranges, widgets, cm } = require("./helpers/harness.cjs");
 
 let h;
@@ -145,9 +147,9 @@ test("空設定の SVG は右上向きで元 URL とアクセシビリティ属�
     assert.equal(svg.tagName, "svg");
     assert.equal(svg.namespaceURI, "http://www.w3.org/2000/svg");
     assert.deepEqual(svg.attributes, {
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
+      viewBox: "0 0 24 21",
+      width: "0.8em",
+      height: "0.7em",
       "aria-hidden": "true",
       focusable: "false",
     });
@@ -164,6 +166,44 @@ test("空設定の SVG は右上向きで元 URL とアクセシビリティ属�
       d: "M3.84 20.25 19.75 4.34M19.75 19.34v-15h-15",
     });
   }
+});
+
+test("SVG の描画領域は丸い線端まで収め、下余白と縦横比の歪みをなくす", () => {
+  const svg = widgets(h.compact("[a](url)"))[0].value.spec.widget.toDOM().children[0];
+  const [x, y, width, height] = svg.attributes.viewBox.split(" ").map(Number);
+  const path = svg.children[0];
+  const points = path.attributes.d.match(/-?\d+(?:\.\d+)?/g).map(Number);
+  const [startX, startY, endX, endY, headX, headY, vertical, horizontal] = points;
+  const radius = Number(path.attributes["stroke-width"]) / 2;
+  const xs = [startX, endX, headX, headX + horizontal];
+  const ys = [startY, endY, headY, headY + vertical];
+  assert.ok(Math.min(...xs) - radius >= x);
+  assert.ok(Math.max(...xs) + radius <= x + width);
+  assert.ok(Math.min(...ys) - radius >= y);
+  assert.equal(Math.max(...ys) + radius, y + height);
+  assert.ok(Math.abs(parseFloat(svg.attributes.width) / parseFloat(svg.attributes.height) - width / height) < 1e-12);
+});
+
+test("文字と SVG はともに 80% に縮小し、SVG の親はタイトルの文字サイズを継承する", () => {
+  const css = readFileSync(path.resolve(__dirname, "../styles/link-compact.css"), "utf8");
+  const textRule = css.match(/\.link-compact-mark\s*\{([^}]+)\}/);
+  const svgRule = css.match(/\.link-compact-mark:has\(> svg\)\s*\{([^}]+)\}/);
+  assert.ok(textRule);
+  assert.ok(svgRule);
+  assert.match(textRule[1], /font-size:\s*80%\s*;/);
+  assert.match(svgRule[1], /font-size:\s*inherit\s*;/);
+  const dimensions = css.match(/\.link-compact-mark\s*>\s*svg\s*\{([^}]+)\}/);
+  assert.ok(dimensions);
+  assert.match(dimensions[1], /width:\s*0\.8em\s*;/);
+  assert.match(dimensions[1], /height:\s*0\.7em\s*;/);
+});
+
+test("SVG の下端は下降部を含む文字領域ではなくベースラインに揃える", () => {
+  const css = readFileSync(path.resolve(__dirname, "../styles/link-compact.css"), "utf8");
+  const rule = css.match(/\.link-compact-mark\s*>\s*svg\s*\{([^}]+)\}/);
+  assert.ok(rule);
+  assert.match(rule[1], /vertical-align:\s*baseline\s*;/);
+  assert.doesNotMatch(rule[1], /(?:transform|translate|top|bottom|margin-top|margin-bottom|position)\s*:/);
 });
 
 test("文字設定は HTML として解釈せず、空白も明示した文字として保持する", () => {
