@@ -42,7 +42,7 @@ for (const invalid of [
 }
 
 test("起動済みエディターを直ちに短縮し、コマンドで切り替える", () => {
-  const view = (h.env.activeEditor = h.createView("[a](url)"));
+  const view = (h.env.activeEditor = h.createView("[a](http://url)"));
   h.entry.activate();
   assert.equal(h.extension.isLinkCompactEditor(view), true);
   assert.equal(widgets(view).length, 1);
@@ -52,14 +52,14 @@ test("起動済みエディターを直ちに短縮し、コマンドで切り�
   assert.equal(view.instance, undefined);
   h.commands.get("link-compact:toggle")();
   assert.equal(widgets(view).length, 1);
-  assert.equal(view.state.doc.toString(), "[a](url)");
+  assert.equal(view.state.doc.toString(), "[a](http://url)");
 });
 
 test("エディター未ロード時は通知を待ち、終了時に購読を解除する", () => {
   h.entry.activate();
   assert.equal(h.editorLoads.size, 1);
   h.commands.get("link-compact:toggle")();
-  const view = (h.env.activeEditor = h.createView("[a](url)"));
+  const view = (h.env.activeEditor = h.createView("[a](http://url)"));
   for (const callback of h.editorLoads) callback(view);
   assert.equal(widgets(view).length, 1);
   h.entry.deactivate();
@@ -73,14 +73,14 @@ test("エディター未ロード時は通知を待ち、終了時に購読を�
 
 test("レイアウトがなくても短縮処理は動く", () => {
   h.env.layout = null;
-  const view = (h.env.activeEditor = h.createView("[a](url)"));
+  const view = (h.env.activeEditor = h.createView("[a](http://url)"));
   h.entry.activate();
   assert.equal(widgets(view).length, 1);
   assert.equal(h.observers.length, 1); // Only the cursor observer.
 });
 
 test("ノート変更で短縮を再適用し、同一ノートや未選択では状態を維持する", () => {
-  const view = (h.env.activeEditor = h.createView("[a](url)"));
+  const view = (h.env.activeEditor = h.createView("[a](http://url)"));
   const controller = new h.Controller();
   controller.activate();
   const firstObserver = controller.observer;
@@ -110,13 +110,13 @@ test("ノート変更で短縮を再適用し、同一ノートや未選択で�
 });
 
 test("ノート変更時は新しいアクティブエディターを使う", () => {
-  h.env.activeEditor = h.createView("[a](one)");
+  h.env.activeEditor = h.createView("[a](http://one)");
   const controller = new h.Controller();
   controller.activate();
-  const next = (h.env.activeEditor = h.createView("[b](two)"));
+  const next = (h.env.activeEditor = h.createView("[b](http://two)"));
   h.env.editingNote = { _id: "note:next" };
   controller.observer.fire();
-  assert.equal(widgets(next)[0].value.spec.widget.url, "two");
+  assert.equal(widgets(next)[0].value.spec.widget.url, "http://two");
   controller.deactivate();
 });
 
@@ -131,49 +131,49 @@ test("未起動・二重終了を許容し、再起動でコマンドが重複�
 });
 
 test("同一エディターへの再適用は装飾・キーマップを重複させない", () => {
-  const view = h.compact("[a](url)");
+  const view = h.compact("[a](http://url)");
   h.extension.ensureLinkCompactExtension(view, false);
   h.extension.ensureLinkCompactExtension(view, false);
   assert.equal(widgets(view).length, 1);
   assert.equal(h.observers.length, 1);
   assert.equal(view.key("Enter"), true);
-  assert.deepEqual(h.openedUris, ["url"]);
+  assert.deepEqual(h.openedUris, ["http://url"]);
 });
 
 test("複数エディターの短縮・編集状態を独立して保持する", () => {
-  const first = h.compact("[a](one)", { anchor: 1 });
-  const second = h.compact("[b](two)", { anchor: 1 });
+  const first = h.compact("[a](http://one)", { anchor: 1 });
+  const second = h.compact("[b](http://two)", { anchor: 1 });
   first.key("Backspace");
   assert.equal(widgets(first).length, 0);
   assert.equal(widgets(second).length, 1);
   h.extension.ensureLinkCompactExtension(first, true);
   assert.equal(first.instance, undefined);
   assert.equal(second.key("Enter"), true);
-  assert.deepEqual(h.openedUris, ["two"]);
+  assert.deepEqual(h.openedUris, ["http://two"]);
 });
 
 test("分割モジュールは有効なエディターへの初回適用まで CodeMirror を読み込まない", () => {
   assert.deepEqual(h.requiredModules, []);
   h.extension.ensureLinkCompactExtension(null, false);
   assert.deepEqual(h.requiredModules, []);
-  const first = h.compact("[a](url)");
+  const first = h.compact("[a](http://url)");
   const loaded = [...h.requiredModules];
   assert.ok(loaded.includes("@codemirror/state"));
   assert.ok(loaded.includes("@codemirror/view"));
   h.extension.ensureLinkCompactExtension(first, false);
-  h.compact("[b](other)");
+  h.compact("[b](http://other)");
   assert.deepEqual(h.requiredModules, loaded);
 });
 
 test("分割後もリンク展開と選択補正は対象エディターだけに適用される", () => {
-  const first = h.compact("![a](image)");
-  const second = h.compact("[b](url)");
+  const first = h.compact("![a](http://image)");
+  const second = h.compact("[b](http://url)");
   first.dispatch({ selection: { anchor: 2 } });
   assert.equal(first.key("Enter"), true);
   assert.equal(widgets(first).length, 0);
   assert.equal(widgets(second).length, 1);
   second.dispatch({ selection: { anchor: 5 } });
-  assert.equal(second.state.selection.main.head, 8);
+  assert.equal(second.state.selection.main.head, 15);
   assert.equal(first.state.selection.main.head, 1);
   assert.equal(widgets(first).length, 0);
   assert.equal(second.key("Backspace"), true);

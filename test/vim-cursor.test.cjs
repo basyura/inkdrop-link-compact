@@ -18,14 +18,14 @@ function cursor(primary = true) {
 }
 
 for (const [name, doc, anchor, hidden] of [
-  ["ラベル", "[abc](url)", 2, false],
-  ["アイコン", "[abc](url)", 4, true],
-  ["URL 内部", "[abc](url)", 7, true],
-  ["開始括弧", "[abc](url)", 0, true],
-  ["画像の感嘆符", "![abc](url)", 0, true],
-  ["画像の角括弧", "![abc](url)", 1, true],
-  ["画像ラベル", "![abc](url)", 3, false],
-  ["リンク外", "[a](url) text", 10, false],
+  ["ラベル", "[abc](http://url)", 2, false],
+  ["アイコン", "[abc](http://url)", 4, true],
+  ["URL 内部", "[abc](http://url)", 7, true],
+  ["開始括弧", "[abc](http://url)", 0, true],
+  ["画像の感嘆符", "![abc](http://url)", 0, true],
+  ["画像の角括弧", "![abc](http://url)", 1, true],
+  ["画像ラベル", "![abc](http://url)", 3, false],
+  ["リンク外", "[a](http://url) text", 17, false],
 ]) {
   test(`Vim のカーソル文字: ${name}`, () => {
     const node = cursor();
@@ -41,7 +41,7 @@ for (const [name, doc, anchor, hidden] of [
 
 test("ラベルへ戻る・記法展開・短縮解除でカーソル文字の非表示を解除する", () => {
   const node = cursor();
-  const view = h.compact("[abc](url)", { anchor: 4, vim: true, cursors: [node] });
+  const view = h.compact("[abc](http://url)", { anchor: 4, vim: true, cursors: [node] });
   assert.equal(node.classList.contains(hiddenClass), true);
   view.dispatch({ selection: { anchor: 3 } });
   assert.equal(node.classList.contains(hiddenClass), false);
@@ -59,7 +59,7 @@ test("ラベルへ戻る・記法展開・短縮解除でカーソル文字の�
 });
 
 test("カーソル DOM の再生成を監視して文字を隠す", () => {
-  const view = h.compact("[a](u)", { anchor: 2 });
+  const view = h.compact("[a](http://u)", { anchor: 2 });
   const observer = h.observers[0];
   assert.equal(observer.target, view.scrollDOM);
   assert.equal(observer.options.childList, true);
@@ -80,10 +80,10 @@ test("カーソル DOM の再生成を監視して文字を隠す", () => {
 test("複数カーソルの主選択・副選択をそれぞれ判定する", () => {
   const secondary = cursor(false);
   const primary = cursor();
-  const view = h.compact("[a](u) [b](v)", { cursors: [secondary, primary] });
+  const view = h.compact("[a](http://u) [b](http://v)", { cursors: [secondary, primary] });
   view.dispatch({
     selection: EditorSelection.create(
-      [EditorSelection.cursor(1), EditorSelection.cursor(9)],
+      [EditorSelection.cursor(1), EditorSelection.cursor(16)],
       1
     ),
   });
@@ -91,7 +91,7 @@ test("複数カーソルの主選択・副選択をそれぞれ判定する", ()
   assert.equal(primary.classList.contains(hiddenClass), true);
   view.dispatch({
     selection: EditorSelection.create(
-      [EditorSelection.cursor(2), EditorSelection.cursor(8)],
+      [EditorSelection.cursor(2), EditorSelection.cursor(15)],
       1
     ),
   });
@@ -101,10 +101,10 @@ test("複数カーソルの主選択・副選択をそれぞれ判定する", ()
 
 test("主カーソルだけ描画された場合も副選択と取り違えない", () => {
   const primary = cursor();
-  const view = h.compact("[a](u) [b](v)", { cursors: [primary] });
+  const view = h.compact("[a](http://u) [b](http://v)", { cursors: [primary] });
   view.dispatch({
     selection: EditorSelection.create(
-      [EditorSelection.cursor(1), EditorSelection.cursor(9)],
+      [EditorSelection.cursor(1), EditorSelection.cursor(16)],
       1
     ),
   });
@@ -112,11 +112,11 @@ test("主カーソルだけ描画された場合も副選択と取り違えな�
 });
 
 for (const [name, doc, anchor, head, hidden] of [
-  ["前方選択の末尾は直前の文字", "[abc](url) x", 1, 4, false],
-  ["前方選択で URL を含む", "[abc](url) x", 1, 5, true],
-  ["後方選択は head の文字", "[abc](url) x", 8, 4, true],
-  ["文書末尾", "[abc](url)", 1, 10, true],
-  ["改行位置は直前に戻さない", "[abc](url)\n", 1, 10, false],
+  ["前方選択の末尾は直前の文字", "[abc](http://url) x", 1, 4, false],
+  ["前方選択で URL を含む", "[abc](http://url) x", 1, 5, true],
+  ["後方選択は head の文字", "[abc](http://url) x", 8, 4, true],
+  ["文書末尾", "[abc](http://url)", 1, 17, true],
+  ["改行位置は直前に戻さない", "[abc](http://url)\n", 1, 17, false],
 ]) {
   test(`Vim の範囲選択: ${name}`, () => {
     const node = cursor();

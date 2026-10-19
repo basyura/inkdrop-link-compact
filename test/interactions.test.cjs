@@ -15,16 +15,16 @@ beforeEach(async () => {
 });
 afterEach(() => h.destroy());
 
-const doc = "x [abc](url) z";
-// [ at 2, label at 3..6, ](url) at 6..12.
+const doc = "x [abc](http://url) z";
+// [ at 2, label at 3..6, ](http://url) at 6..19.
 const moves = [
   ["右から開始括弧へ", 1, 2, 3],
   ["ラベルから左へ", 3, 2, 1],
   ["ラベル内部", 3, 4, 4],
   ["アイコン位置", 5, 6, 6],
-  ["URL 内部を右へ", 6, 7, 12],
-  ["URL 内部を左へ", 12, 11, 6],
-  ["リンクの後へ", 12, 13, 13],
+  ["URL 内部を右へ", 6, 7, 19],
+  ["URL 内部を左へ", 19, 18, 6],
+  ["リンクの後へ", 19, 20, 20],
 ];
 for (const vim of [false, true]) {
   for (const [name, from, to, expected] of moves) {
@@ -39,8 +39,8 @@ for (const vim of [false, true]) {
 }
 
 for (const [name, from, to, expected] of [
-  ["l で URL を越える", 6, 7, 12],
-  ["h で URL を越える", 12, 11, 6],
+  ["l で URL を越える", 6, 7, 19],
+  ["h で URL を越える", 19, 18, 6],
   ["h で開始括弧を越える", 3, 2, 1],
 ]) {
   test(`他プラグインの移動補正後も短縮範囲を越える: ${name}`, () => {
@@ -67,19 +67,19 @@ for (const [name, from, to, expected] of [
 }
 
 for (const [name, text, from, to, expected, vim] of [
-  ["画像の ![ を右へ", "x ![a](u) z", 1, 2, 4, false],
-  ["画像の ![ を左へ", "x ![a](u) z", 4, 3, 1, false],
-  ["文書先頭", "[a](u)", 1, 0, 1, false],
-  ["隣接リンクを右へ", "[a](u)[b](v)", 2, 3, 7, false],
-  ["隣接リンクを左へ", "[a](u)[b](v)", 7, 6, 2, false],
-  ["隣接画像を右へ", "![a](u)![b](v)", 3, 4, 9, false],
-  ["空ラベル", "[](u)", 1, 2, 5, false],
-  ["通常の行末", "[a](u)", 2, 3, 6, false],
-  ["Vim の行末", "[a](u)", 2, 3, 2, true],
-  ["Vim の中間行末", "[a](u)\nnext", 2, 3, 2, true],
-  ["絵文字の直後を左へ", "😀[a](u)", 3, 2, 0, false],
-  ["結合文字の直後を左へ", "é[a](u)", 3, 2, 0, false],
-  ["改行直後を左へ", "x\n[a](u)", 3, 2, 1, false],
+  ["画像の ![ を右へ", "x ![a](http://u) z", 1, 2, 4, false],
+  ["画像の ![ を左へ", "x ![a](http://u) z", 4, 3, 1, false],
+  ["文書先頭", "[a](http://u)", 1, 0, 1, false],
+  ["隣接リンクを右へ", "[a](http://u)[b](http://v)", 2, 3, 14, false],
+  ["隣接リンクを左へ", "[a](http://u)[b](http://v)", 14, 13, 2, false],
+  ["隣接画像を右へ", "![a](http://u)![b](http://v)", 3, 4, 16, false],
+  ["空ラベル", "[](http://u)", 1, 2, 12, false],
+  ["通常の行末", "[a](http://u)", 2, 3, 13, false],
+  ["Vim の行末", "[a](http://u)", 2, 3, 2, true],
+  ["Vim の中間行末", "[a](http://u)\nnext", 2, 3, 2, true],
+  ["絵文字の直後を左へ", "😀[a](http://u)", 3, 2, 0, false],
+  ["結合文字の直後を左へ", "é[a](http://u)", 3, 2, 0, false],
+  ["改行直後を左へ", "x\n[a](http://u)", 3, 2, 1, false],
 ]) {
   test(`カーソル境界: ${name}`, () => {
     const view = h.compact(text, { anchor: from, vim });
@@ -89,16 +89,16 @@ for (const [name, text, from, to, expected, vim] of [
 }
 
 test("複数カーソルを補正し主選択を保持する", () => {
-  const view = h.compact("[a](u) [b](v)");
+  const view = h.compact("[a](http://u) [b](http://v)");
   view.dispatch({
     selection: EditorSelection.create(
-      [EditorSelection.cursor(3), EditorSelection.cursor(10)],
+      [EditorSelection.cursor(3), EditorSelection.cursor(17)],
       1
     ),
   });
   assert.deepEqual(
     view.state.selection.ranges.map((range) => range.head),
-    [6, 13]
+    [13, 27]
   );
   assert.equal(view.state.selection.mainIndex, 1);
 });
@@ -150,7 +150,7 @@ for (const [name, link] of [
 }
 
 test("画像の Enter は URL を開かず、記法を展開して ! の後ろへ移動する", () => {
-  const text = "x ![alt](image) z";
+  const text = "x ![alt](http://image) z";
   const view = h.compact(text, { anchor: 5 });
   assert.equal(view.key("Enter"), true);
   assert.equal(view.state.selection.main.head, 3);
@@ -165,7 +165,7 @@ test("画像の Enter は URL を開かず、記法を展開して ! の後ろ�
 
 for (const [key, position] of [
   ["Backspace", 3],
-  ["Backspace", 12],
+  ["Backspace", 19],
   ["Delete", 6],
 ]) {
   test(`${key} は位置 ${position} の隠れた記法を削除する前に展開する`, () => {
@@ -180,8 +180,8 @@ for (const [key, position] of [
 
 test("文書末尾の Backspace と画像ラベル先頭の Backspace でも展開する", () => {
   for (const [text, anchor] of [
-    ["[a](u)", 6],
-    ["![a](u)", 2],
+    ["[a](http://u)", 13],
+    ["![a](http://u)", 2],
   ]) {
     const view = h.compact(text, { anchor });
     assert.equal(view.key("Backspace"), true);
@@ -218,7 +218,7 @@ for (const key of ["Enter", "Backspace", "Delete"]) {
   }
 }
 
-for (const position of [3, 4, 6, 8]) {
+for (const position of [3, 4, 6, 15]) {
   test(`リンク位置 ${position} への文字入力で記法を展開する`, () => {
     const view = h.compact(doc);
     view.dispatch({
@@ -238,7 +238,7 @@ for (const position of [3, 4, 6, 8]) {
 }
 
 test("リンク以外の編集・端点への挿入は短縮を維持する", () => {
-  for (const from of [0, 2, 12, doc.length]) {
+  for (const from of [0, 2, 19, doc.length]) {
     const view = h.compact(doc);
     view.dispatch({
       changes: { from, insert: "X" },
@@ -265,43 +265,43 @@ test("展開済みリンクは別の場所の編集で位置がずれても編�
 });
 
 test("未完了リンクの完成・URL 更新・記法の破壊に追従する", () => {
-  const view = h.compact("[a](url");
+  const view = h.compact("[a](http://url");
   assert.equal(widgets(view).length, 0);
-  view.dispatch({ changes: { from: 7, insert: ")" }, selection: { anchor: 0 } });
-  assert.equal(widgets(view)[0].value.spec.widget.url, "url");
+  view.dispatch({ changes: { from: 14, insert: ")" }, selection: { anchor: 0 } });
+  assert.equal(widgets(view)[0].value.spec.widget.url, "http://url");
   view.dispatch({
-    changes: { from: 4, to: 7, insert: "new" },
+    changes: { from: 4, to: 14, insert: "http://new" },
     selection: { anchor: 0 },
   });
-  assert.equal(widgets(view)[0].value.spec.widget.url, "new");
-  view.dispatch({ changes: { from: 7, to: 8 }, selection: { anchor: 0 } });
+  assert.equal(widgets(view)[0].value.spec.widget.url, "http://new");
+  view.dispatch({ changes: { from: 14, to: 15 }, selection: { anchor: 0 } });
   assert.equal(widgets(view).length, 0);
 });
 
 test("複数リンクのうち編集したリンクだけ展開する", () => {
-  const view = h.compact("[abc](one) [def](two)");
+  const view = h.compact("[abc](http://one) [def](http://two)");
   view.dispatch({ changes: { from: 2, insert: "X" }, selection: { anchor: 3 } });
   assert.deepEqual(
     widgets(view).map(({ value }) => value.spec.widget.url),
-    ["two"]
+    ["http://two"]
   );
   view.dispatch({ selection: { anchor: view.state.doc.length } });
   assert.deepEqual(
     widgets(view).map(({ value }) => value.spec.widget.url),
-    ["one", "two"]
+    ["http://one", "http://two"]
   );
 });
 
 test("範囲置換と複数箇所の編集も選択中のリンクだけ展開する", () => {
-  const view = h.compact("[abc](one) [def](two)");
+  const view = h.compact("[abc](http://one) [def](http://two)");
   view.dispatch({
     changes: [
       { from: 1, to: 4, insert: "ABC" },
-      { from: 12, to: 15, insert: "DEF" },
+      { from: 19, to: 22, insert: "DEF" },
     ],
     selection: EditorSelection.create([
       EditorSelection.cursor(2),
-      EditorSelection.cursor(13),
+      EditorSelection.cursor(20),
     ]),
   });
   assert.equal(widgets(view).length, 0);
@@ -329,10 +329,10 @@ test("h / l は入力用に残し、通常文字入力として文書へ反映�
 });
 
 for (const [key, text, startLine, expected] of [
-  ["o", "[a](url)", 1, "[a](url)\n"],
-  ["O", "[a](url)\nnext", 1, "[a](url)\n\nnext"],
+  ["o", "[a](http://url)", 1, "[a](http://url)\n"],
+  ["O", "[a](http://url)\nnext", 1, "[a](http://url)\n\nnext"],
   ["o", "[a](inkdrop://note:1)", 1, "[a](inkdrop://note:1)\n"],
-  ["o", "![a](image.png)", 1, "![a](image.png)\n"],
+  ["o", "![a](http://image.png)", 1, "![a](http://image.png)\n"],
 ]) {
   test(`Vim ${key} は短縮リンクを分割せず行を追加する: ${text}`, () => {
     const view = h.compact(text, {
@@ -359,7 +359,7 @@ for (const [key, text, startLine, expected] of [
 
 test("Vim の通常移動と他モードでは行末の選択補正を維持する", () => {
   for (const mode of ["l", "insert", "visual", "replace", "modifier"]) {
-    const view = h.compact("[a](url)", { anchor: 2, vim: true });
+    const view = h.compact("[a](http://url)", { anchor: 2, vim: true });
     if (mode === "insert") {
       view.dom.classList.remove("vim-mode-normal");
       view.dom.classList.add("vim-mode-insert");
@@ -375,7 +375,7 @@ test("Vim の通常移動と他モードでは行末の選択補正を維持す�
       view.keydown("l");
     }
     view.dispatch({ selection: { anchor: view.state.doc.length } });
-    assert.equal(view.state.selection.main.head, mode === "insert" ? 8 : 2);
+    assert.equal(view.state.selection.main.head, mode === "insert" ? 15 : 2);
   }
 });
 
@@ -384,8 +384,8 @@ for (const key of ["o", "O"]) {
     const first = (h.env.activeEditor = h.createView("before"));
     const controller = new h.Controller();
     controller.activate();
-    const view = (h.env.activeEditor = h.createView("[a](url)\nnext", {
-      anchor: key === "O" ? 9 : 1,
+    const view = (h.env.activeEditor = h.createView("[a](http://url)\nnext", {
+      anchor: key === "O" ? 16 : 1,
       vim: true,
     }));
     view.dom.classList.remove("vim-mode-normal");
@@ -393,13 +393,13 @@ for (const key of ["o", "O"]) {
     controller.observer.fire();
     assert.equal(widgets(view).length, 1);
     view.keydown(key);
-    view.dispatch({ selection: { anchor: 8 } });
-    assert.equal(view.state.selection.main.head, 8);
+    view.dispatch({ selection: { anchor: 15 } });
+    assert.equal(view.state.selection.main.head, 15);
     view.dispatch({
-      changes: { from: 8, insert: "\n" },
-      selection: { anchor: 9 },
+      changes: { from: 15, insert: "\n" },
+      selection: { anchor: 16 },
     });
-    assert.equal(view.state.doc.toString(), "[a](url)\n\nnext");
+    assert.equal(view.state.doc.toString(), "[a](http://url)\n\nnext");
     assert.equal(widgets(view).length, 1);
     assert.equal(first.state.doc.toString(), "before");
     controller.deactivate();
@@ -407,11 +407,11 @@ for (const key of ["o", "O"]) {
 }
 
 for (const [name, text, from, inserted, expected] of [
-  ["通常リンク", "[a](url)", 2, "\n", "[a](url)\n"],
-  ["URL の内部", "[a](url)", 5, "\n", "[a](url)\n"],
+  ["通常リンク", "[a](http://url)", 2, "\n", "[a](http://url)\n"],
+  ["URL の内部", "[a](http://url)", 5, "\n", "[a](http://url)\n"],
   ["ノートリンク", "[a](inkdrop://note:1)", 2, "\n", "[a](inkdrop://note:1)\n"],
-  ["画像リンク", "![a](image.png)", 3, "\n", "![a](image.png)\n"],
-  ["インデント", "[a](url)", 2, "\n  ", "[a](url)\n  "],
+  ["画像リンク", "![a](http://image.png)", 3, "\n", "![a](http://image.png)\n"],
+  ["インデント", "[a](http://url)", 2, "\n  ", "[a](http://url)\n  "],
 ]) {
   test(`初回キーの判定が間に合わなくても ${name} の改行を行末へ移す`, () => {
     const view = h.compact(text, { anchor: 2, vim: true });
@@ -429,14 +429,14 @@ for (const [name, text, from, inserted, expected] of [
 
 test("挿入モードと Vim 以外の改行はリンク編集中として扱う", () => {
   for (const vim of [true, false]) {
-    const view = h.compact("[a](url)", { anchor: 2, vim });
+    const view = h.compact("[a](http://url)", { anchor: 2, vim });
     if (vim) view.scrollDOM.classList.remove("cm-vimMode");
     view.dispatch({
       changes: { from: 2, insert: "\n" },
       selection: { anchor: 3 },
       userEvent: "input",
     });
-    assert.equal(view.state.doc.toString(), "[a\n](url)");
+    assert.equal(view.state.doc.toString(), "[a\n](http://url)");
   }
 });
 
@@ -463,7 +463,7 @@ test("短縮解除中は記法内部の選択とキーを制御しない", () =>
   assert.equal(view.state.doc.toString(), doc);
 });
 
-for (const text of ["[label](url)", "[label](inkdrop://note:1)", "![label](image.png)", "prefix [label](url)"]) {
+for (const text of ["[label](http://url)", "[label](inkdrop://note:1)", "![label](http://image.png)", "prefix [label](http://url)"]) {
   test(`Vim i はラベル先頭からリンクの前へ挿入する: ${text}`, () => {
     const start = text.startsWith("!") ? 0 : text.indexOf("[");
     const view = h.compact(text, { anchor: text.indexOf("[") + 1, vim: true });
@@ -483,7 +483,7 @@ for (const text of ["[label](url)", "[label](inkdrop://note:1)", "![label](image
 
 for (const mode of ["plain", "insert", "visual", "replace", "modifier", "composition", "middle", "selection", "multiple", "expanded", "other key"]) {
   test(`Vim i の補正は ${mode} には適用しない`, () => {
-    const view = h.compact("[label](url)", { anchor: 1, vim: mode !== "plain" });
+    const view = h.compact("[label](http://url)", { anchor: 1, vim: mode !== "plain" });
     if (["insert", "visual", "replace"].includes(mode)) view.dom.classList.add(`vim-mode-${mode}`);
     if (mode === "composition") view.composing = true;
     if (mode === "middle") view.dispatch({ selection: { anchor: 2 } });
@@ -497,7 +497,7 @@ for (const mode of ["plain", "insert", "visual", "replace", "modifier", "composi
 }
 
 test("Vim i の補正は次のキーで解除され、通常移動へ影響しない", () => {
-  const view = h.compact("[label](url)", { anchor: 1, vim: true });
+  const view = h.compact("[label](http://url)", { anchor: 1, vim: true });
   view.keydown("i");
   assert.equal(view.state.selection.main.head, 0);
   view.keydown("Escape");
@@ -507,7 +507,7 @@ test("Vim i の補正は次のキーで解除され、通常移動へ影響し�
 });
 
 test("短縮解除中の Vim i はカーソル位置を変えない", () => {
-  const view = h.compact("[label](url)", { anchor: 1, vim: true });
+  const view = h.compact("[label](http://url)", { anchor: 1, vim: true });
   h.extension.ensureLinkCompactExtension(view, true);
   view.keydown("i");
   assert.equal(view.state.selection.main.head, 1);
