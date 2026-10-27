@@ -512,3 +512,252 @@ test("短縮解除中の Vim i はカーソル位置を変えない", () => {
   view.keydown("i");
   assert.equal(view.state.selection.main.head, 1);
 });
+
+function visualView(text, anchor, head = anchor, mode = {}) {
+  const view = h.compact(text, { anchor: head, vim: true });
+  view.dom.classList.add('vim-mode-visual');
+  const pos = (offset) => {
+    const line = view.state.doc.lineAt(offset);
+    return { line: line.number - 1, ch: offset - line.from };
+  };
+  view.cm = {
+    state: { vim: { visualMode: true, ...mode, sel: { anchor: pos(anchor), head: pos(head) } } },
+    curOp: { isVimOp: true },
+  };
+  const move = (target) => {
+    view.cm.state.vim.sel.head = pos(target);
+    view.dispatch({ selection: {
+      anchor: anchor + (target < anchor ? 1 : 0),
+      head: Math.min(text.length, target + (target >= anchor ? 1 : 0)),
+    } });
+    const actual = view.cm.state.vim.sel.head;
+    return view.state.doc.line(actual.line + 1).from + actual.ch;
+  };
+  move(head);
+  return { view, move };
+}
+
+for (const link of ['[abc](http://url)', '[abc](inkdrop://note)', '![abc](http://url)']) {
+  for (const reverse of [false, true]) {
+    test(`Visual の左右移動と内部位置同期: ${link}, reverse=${reverse}`, () => {
+      const text = `x ${link} z`;
+      const label = text.indexOf('[') + 1;
+      const icon = text.indexOf(']');
+      const end = text.indexOf(')') + 1;
+      const anchor = reverse ? text.length - 1 : 0;
+      const { view, move } = visualView(text, anchor, icon);
+      assert.equal(move(icon + 1), end);
+      assert.equal(move(end - 1), icon);
+      assert.equal(move(label - 1), 1);
+      assert.equal(move(2), label);
+      assert.equal(view.state.selection.main.anchor, anchor + (reverse ? 1 : 0));
+      assert.equal(view.state.doc.toString(), text);
+      assert.equal(widgets(view).length, 1);
+    });
+  }
+}
+
+for (const [text, start, target, expected] of [
+  ['[a](http://u)', 2, 3, 2],
+  ['[a](http://u)\nnext', 2, 3, 2],
+  ['[a](http://u)[b](http://v)', 2, 3, 14],
+  ['[a](http://u)[b](http://v)', 14, 13, 2],
+  ['😀[a](http://u) z', 3, 2, 0],
+]) {
+  test(`Visual の境界: ${JSON.stringify(text)}, ${start} -> ${target}`, () => {
+    const { move } = visualView(text, 0, start);
+    assert.equal(move(target), expected);
+  });
+}
+
+for (const mode of [{ visualLine: true }, { visualBlock: true }]) {
+  test(`Visual の行・矩形選択を変更しない: ${JSON.stringify(mode)}`, () => {
+    const { view, move } = visualView(doc, 0, 6, mode);
+    assert.equal(move(7), 7);
+    assert.equal(view.state.selection.main.head, 8);
+  });
+}
+
+test('Visual のマウス選択・IME・エフェクト付き更新には干渉しない', () => {
+  const { view } = visualView(doc, 0, 6);
+  for (const kind of ['mouse', 'composition', 'effect']) {
+    view.cm.curOp.isVimOp = kind !== 'mouse';
+    view.composing = kind === 'composition';
+    view.dispatch({ selection: { anchor: 0, head: 8 },
+      effects: kind === 'effect' ? StateEffect.define().of(true) : [] });
+    assert.equal(view.state.selection.main.head, 8);
+  }
+});
+
+test('Visual の選択開始位置を跨ぐ補正で選択方向を維持する', () => {
+  const { view, move } = visualView(doc, 3);
+  assert.equal(move(2), 1);
+  assert.equal(view.state.selection.main.anchor, 4);
+  assert.equal(view.state.selection.main.head, 1);
+  assert.equal(move(2), 3);
+  assert.equal(view.state.selection.main.anchor, 3);
+  assert.equal(view.state.selection.main.head, 4);
+});
+
+test('Visual の編集中リンクと短縮解除には補正しない', () => {
+  const { view, move } = visualView(doc, 0, 6);
+  view.instance.editingRanges = new Set(view.instance.ranges);
+  assert.equal(move(7), 7);
+  h.extension.ensureLinkCompactExtension(view, true);
+  assert.equal(move(8), 8);
+});
+
+test('Visual の補正はトランザクション確定前に Vim 内部状態を変更しない', () => {
+  const { view } = visualView(doc, 0, 6);
+  view.cm.state.vim.sel.head = { line: 0, ch: 7 };
+  const transaction = view.state.update({ selection: { anchor: 0, head: 8 } });
+  assert.equal(transaction.newSelection.main.head, 20);
+  assert.equal(view.cm.state.vim.sel.head.ch, 7);
+});
+
+for (const link of ['[google](https://google.com)', '[google](inkdrop://note)', '![google](https://google.com)']) {
+  for (const suffix of ['', ' ']) {
+    for (const reverse of [false, true]) {
+      test(`Visual の全文選択は元の Markdown を含む: ${link}, suffix=${JSON.stringify(suffix)}, reverse=${reverse}`, () => {
+        const text = link + suffix;
+        const label = text.indexOf('[') + 1;
+        const icon = text.indexOf(']');
+        const end = suffix ? text.length - 1 : icon;
+        const anchor = reverse ? end : label;
+        const { view, move } = visualView(text, anchor);
+        move(reverse ? label : end);
+        const selected = view.state.selection.main;
+        assert.equal(view.state.sliceDoc(selected.from, selected.to), text);
+        assert.equal(view.instance.visualHead, reverse ? label : end);
+        // Vim normalizes its selection before reading it for an operator.
+        view.dispatch({ selection: { anchor: label, head: end + 1 } });
+        const yank = view.state.selection.main;
+        assert.equal(view.state.sliceDoc(yank.from, yank.to), text);
+        assert.equal(view.state.doc.toString(), text);
+      });
+    }
+  }
+}
+
+for (const [start, end, expected] of [
+  [1, 6, 'google'],
+  [2, 4, 'oog'],
+  [3, 7, 'ogle](https://google.com)'],
+  [7, 7, '](https://google.com)'],
+]) {
+  test(`Visual の部分選択: ${start}..${end}`, () => {
+    const text = '[google](https://google.com)';
+    const { view, move } = visualView(text, start);
+    move(end);
+    const selection = view.state.selection.main;
+    assert.equal(view.state.sliceDoc(selection.from, selection.to), expected);
+  });
+}
+
+test('Visual の元記法を含めた選択後も左右移動を続けられる', () => {
+  const text = '[google](https://google.com) z';
+  const icon = text.indexOf(']');
+  const end = text.indexOf(')') + 1;
+  const { view, move } = visualView(text, 1, icon);
+  assert.equal(view.state.selection.main.from, 0);
+  assert.equal(view.state.selection.main.to, end);
+  assert.equal(move(icon + 1), end);
+  assert.equal(move(end - 1), icon);
+  assert.equal(move(icon - 1), icon - 1);
+  assert.equal(view.state.selection.main.from, 1);
+  assert.equal(view.state.selection.main.to, icon);
+});
+
+test('Visual の隣接リンクは両方の元記法を選択する', () => {
+  const text = '[a](http://u)![b](http://v)';
+  const { view, move } = visualView(text, 1);
+  move(text.lastIndexOf(']'));
+  assert.equal(view.state.sliceDoc(view.state.selection.main.from, view.state.selection.main.to), text);
+});
+
+test('Visual の行単位演算で Vim が指定した改行までの範囲を保持する', () => {
+  const text = 'prefix [google](https://google.com) suffix\nnext';
+  const { view } = visualView(text, 9, 10);
+  const lineEnd = text.indexOf('\n') + 1;
+  view.dispatch({ selection: { anchor: 0, head: lineEnd } });
+  assert.equal(view.state.selection.main.from, 0);
+  assert.equal(view.state.selection.main.to, lineEnd);
+});
+
+function deleteVisualSelection(view, operator = 'change') {
+  const selected = view.state.selection.main;
+  const oldDoc = view.state.doc;
+  const vim = view.cm.state.vim;
+  const offset = (pos) => oldDoc.line(pos.line + 1).from + pos.ch;
+  const logicalFrom = Math.min(offset(vim.sel.anchor), offset(vim.sel.head));
+  const oldLine = oldDoc.lineAt(logicalFrom);
+  vim.lastEditInputState = { operator };
+  view.dispatch({ changes: { from: selected.from, to: selected.to },
+    selection: { anchor: selected.from } });
+  vim.insertMode = true;
+  const newLine = view.state.doc.lineAt(selected.from);
+  return newLine.from + Math.min(logicalFrom - oldLine.from, newLine.length);
+}
+
+for (const link of ['[abc](http://url)', '[abc](inkdrop://note)', '![abc](http://url)']) {
+  for (const prefix of ['', 'prefix ', 'first\n']) {
+    for (const reverse of [false, true]) {
+      test(`Visual c の挿入先は元記法の先頭: ${link}, ${JSON.stringify(prefix)}, reverse=${reverse}`, () => {
+        const text = prefix + link + ' z';
+        const label = text.indexOf('[') + 1;
+        const icon = text.indexOf(']');
+        const { view, move } = visualView(text, reverse ? icon : label);
+        move(reverse ? label : icon);
+        const requested = deleteVisualSelection(view);
+        assert.equal(view.state.doc.toString(), prefix + ' z');
+        // enterInsertMode first exits Visual mode, then restores the old start.
+        const visualHead = view.cm.state.vim.sel.head;
+        const line = view.state.doc.line(visualHead.line + 1);
+        view.dispatch({ selection: { anchor: line.from + Math.min(visualHead.ch, line.length) } });
+        view.cm.state.vim.visualMode = false;
+        view.dispatch({ selection: { anchor: requested } });
+        assert.equal(view.state.selection.main.head, prefix.length);
+        view.dispatch({ changes: { from: view.state.selection.main.head, insert: 'X' } });
+        assert.equal(view.state.doc.toString(), prefix + 'X z');
+      });
+    }
+  }
+}
+
+for (const suffix of ['', '\nnext']) {
+  test(`Visual c で文書末尾・行末を変更できる: ${JSON.stringify(suffix)}`, () => {
+    const text = '[abc](http://url)' + suffix;
+    const { view, move } = visualView(text, 1);
+    move(text.indexOf(']'));
+    const requested = deleteVisualSelection(view);
+    view.cm.state.vim.visualMode = false;
+    view.dispatch({ selection: { anchor: requested } });
+    view.dispatch({ changes: { from: view.state.selection.main.head, insert: 'X' } });
+    assert.equal(view.state.doc.toString(), 'X' + suffix);
+  });
+}
+
+test('Visual c のラベルだけの部分変更では選択位置を保持する', () => {
+  const { view, move } = visualView('[abc](http://url) z', 2);
+  move(3);
+  const requested = deleteVisualSelection(view);
+  assert.equal(view.instance.pendingVisualChange, null);
+  view.cm.state.vim.visualMode = false;
+  view.dispatch({ selection: { anchor: requested } });
+  view.dispatch({ changes: { from: view.state.selection.main.head, insert: 'X' } });
+  assert.equal(view.state.doc.toString(), '[aX](http://url) z');
+});
+
+for (const mode of ['other operation', 'normal input', 'composition', 'other deletion']) {
+  test(`Visual c の挿入先補正を適用しない: ${mode}`, () => {
+    const { view, move } = visualView('[abc](http://url) z', 1);
+    move(4);
+    const requested = deleteVisualSelection(view, mode === 'normal input' ? 'delete' : 'change');
+    if (mode === 'other operation') view.cm.curOp = { isVimOp: true };
+    if (mode === 'composition') view.composing = true;
+    if (mode === 'other deletion') view.dispatch({ changes: { from: 1, to: 2 } });
+    view.cm.state.vim.visualMode = false;
+    view.dispatch({ selection: { anchor: requested } });
+    assert.equal(view.state.selection.main.head, requested);
+  });
+}
