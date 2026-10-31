@@ -17,4 +17,4 @@
 - `lib/interactions.js`: キー操作、選択・改行の補正。
 - `lib/view-plugin.js`: エディターごとの編集状態、装飾更新、Vim カーソルの監視。
 
-CodeMirror の読み込みと拡張の生成は、有効なエディターに初めて適用するときに行う。
+`lib/extension.js` の `@codemirror/state` は静的 `import` で読み込む。他のモジュール内の CodeMirror の読み込みと拡張の生成は、有効なエディターに初めて適用するときに行う。

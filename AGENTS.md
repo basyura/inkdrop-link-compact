@@ -49,7 +49,7 @@ Use JavaScript matching the existing codebase:
 - `use babel` pragma for plugin source files
 - Keep module filenames kebab-case, for example `extension.js`
 - Prefer small, direct functions and minimal comments
-- Keep formatting consistent with the existing file style, and use Prettier only when it is already available in the project or local environment
+- ファイルを編集した際は、リポジトリの `.prettierrc` に従って Prettier でフォーマットすること。
 
 Do not introduce new tooling unless the repository adopts it first.
 

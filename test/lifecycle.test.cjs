@@ -152,7 +152,8 @@ test("複数エディターの短縮・編集状態を独立して保持する",
   assert.deepEqual(h.openedUris, ["http://two"]);
 });
 
-test("分割モジュールは有効なエディターへの初回適用まで CodeMirror を読み込まない", () => {
+test("state は静的に読み込み、残りの CodeMirror 読み込みと拡張生成は初回適用まで遅延する", () => {
+  assert.deepEqual(h.importedModules, ["@codemirror/state"]);
   assert.deepEqual(h.requiredModules, []);
   h.extension.ensureLinkCompactExtension(null, false);
   assert.deepEqual(h.requiredModules, []);
@@ -163,6 +164,7 @@ test("分割モジュールは有効なエディターへの初回適用まで C
   h.extension.ensureLinkCompactExtension(first, false);
   h.compact("[b](http://other)");
   assert.deepEqual(h.requiredModules, loaded);
+  assert.deepEqual(h.importedModules, ["@codemirror/state"]);
 });
 
 test("分割後もリンク展開と選択補正は対象エディターだけに適用される", () => {

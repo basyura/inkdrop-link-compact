@@ -37,6 +37,7 @@ async function createHarness(config = {}) {
   const observers = [];
   const registrations = [];
   const requiredModules = [];
+  const importedModules = [];
   const domHandlers = [];
   const views = [];
   const commands = new Map();
@@ -136,6 +137,19 @@ async function createHarness(config = {}) {
   const modules = new Map();
   async function load(name) {
     if (modules.has(name)) return modules.get(name);
+    if (name === "@codemirror/state") {
+      const module = new vm.SyntheticModule(
+        Object.keys(state),
+        function () {
+          for (const [key, value] of Object.entries(state))
+            this.setExport(key, value);
+        },
+        { context }
+      );
+      importedModules.push(name);
+      modules.set(name, module);
+      return module;
+    }
     if (name === "event-kit") {
       const module = new vm.SyntheticModule(
         ["CompositeDisposable"],
@@ -147,7 +161,7 @@ async function createHarness(config = {}) {
       modules.set(name, module);
       return module;
     }
-    const filename = path.resolve(__dirname, "../../lib", `${name}.js`);
+    const filename = path.resolve(__dirname, "../../lib", name);
     const module = new vm.SourceTextModule(readFileSync(filename, "utf8"), {
       context,
       identifier: filename,
@@ -156,9 +170,9 @@ async function createHarness(config = {}) {
     await module.link((specifier) => load(specifier.replace(/^\.\//, "")));
     return module;
   }
-  const main = await load("link-compact");
+  const main = await load("link-compact.js");
   await main.evaluate();
-  const extension = modules.get("extension").namespace;
+  const extension = modules.get("extension.js").namespace;
 
   function createView(doc, { anchor = 0, vim = false, cursors = [] } = {}) {
     const instances = new Map();
@@ -232,8 +246,9 @@ async function createHarness(config = {}) {
     document,
     extension,
     requiredModules,
+    importedModules,
     entry: hostModule.exports,
-    Controller: modules.get("controller").namespace.default,
+    Controller: modules.get("controller.js").namespace.default,
     createView,
     compact(doc, options) {
       const view = createView(doc, options);
