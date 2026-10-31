@@ -49,6 +49,24 @@ Use JavaScript matching the existing codebase:
 - `use babel` pragma for plugin source files
 - Keep module filenames kebab-case, for example `extension.js`
 - Prefer small, direct functions and minimal comments
+- `getExtensionSpec()` のように他の処理から呼び出す関数・メソッド（コンストラクターを含む）の説明コメントは、次の複数行のブロックコメント形式に統一する。
+
+  ```js
+  /*
+   * 短縮表示に必要な状態と操作を持つエディターか判定する。
+   */
+  ```
+
+- 関数内のロジックを説明するコメントには `//` を使う。関数内で定義するアロー関数も、内部ロジックの説明であればブロックコメントにしない。
+
+  ```js
+  // エディターに対応する表示プラグインと選択補正フィルターを組み合わせる。
+  const extension = (view) => [
+    plugin,
+    // ...
+  ];
+  ```
+
 - ファイルを編集した際は、リポジトリの `.prettierrc` に従って Prettier でフォーマットすること。
 
 Do not introduce new tooling unless the repository adopts it first.
